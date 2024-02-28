@@ -1,0 +1,14 @@
+# Data handling
+numpy
+pandas
+
+# LLM
+chatarena
+openai
+# TODO add other LLM libraires here
+
+# Visualisations
+matplotlib
+seaborn
+
+# any other librairies...

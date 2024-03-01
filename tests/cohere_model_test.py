@@ -14,7 +14,7 @@ response = co.chat(
   ],
   message="What year was he born?",
   # perform web search before answering the question. You can also use your own custom connector.
-  connectors=[{"id": "web-search"}]
+#   connectors=[{"id": "web-search"}]
 )
 
 print(response.text)

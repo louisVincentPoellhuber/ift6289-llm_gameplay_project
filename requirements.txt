@@ -12,3 +12,4 @@ matplotlib
 seaborn
 
 # any other librairies...
+torch

@@ -5,6 +5,7 @@ pandas
 # LLM
 chatarena
 openai
+cohere==4.53
 # TODO add other LLM libraires here
 
 # Visualisations
@@ -13,3 +14,4 @@ seaborn
 
 # any other librairies...
 torch
+python-dotenv==1.0.1

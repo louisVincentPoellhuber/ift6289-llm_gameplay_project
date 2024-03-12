@@ -1,4 +1,9 @@
 import sys
+import os
+from dotenv import load_dotenv
+load_dotenv()
+CHATARENA_PATH = os.getenv("CHATARENA_PATH")
+sys.path.append(CHATARENA_PATH)
 
 from chatarena.agent import Player
 from chatarena.backends import CohereAIChat, OpenAIChat, Human

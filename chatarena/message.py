@@ -43,7 +43,7 @@ class Message:
     agent_name: str
     content: str
     turn: int
-    cohere_agent: str = None
+    #role: str = "CHATBOT"
     timestamp: int = time.time_ns()
     visible_to: Union[str, List[str]] = "all"
     msg_type: str = "text"
@@ -51,7 +51,7 @@ class Message:
 
     def __post_init__(self):
         # print("post init!")
-        self.message_dict = [{"role": self.cohere_agent, "message": self.content}]
+        self.message_dict = [{"role": self.agent_name, "message": self.content}]
         # print("self.message_dict:", self.message_dict)
 
     @property

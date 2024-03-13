@@ -1,3 +1,10 @@
+import sys
+import os
+from dotenv import load_dotenv
+load_dotenv()
+CHATARENA_PATH = os.getenv("CHATARENA_PATH")
+sys.path.append(CHATARENA_PATH)
+
 import numpy as np
 import pandas as pd
 
@@ -5,8 +12,6 @@ from chatarena.agent import Player
 from chatarena.backends import CohereAIChat
 
 import cohere
-
-import os
 
 from chatarena.environments.base import TimeStep, Environment
 from chatarena.message import Message, MessagePool
@@ -36,7 +41,7 @@ class Bargaining(Environment):
         """
         moderator say something
         """
-        message = Message(agent_name="Moderator", content=text, turn=self.turn, visible_to=visible_to, cohere_agent="USER")
+        message = Message(agent_name="Moderator", content=text, turn=self.turn, visible_to=visible_to)
         self.message_pool.append_message(message)
 
     def reset(self):

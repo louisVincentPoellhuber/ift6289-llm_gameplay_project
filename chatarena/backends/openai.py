@@ -158,7 +158,7 @@ class OpenAIChat(IntelligenceBackend):
                     else:
                         raise ValueError(f"Invalid role: {messages[-1]['role']}")
 
-        response = self._get_response(messages, *args, **kwargs)
+        response = self._get_response(messages)
 
         # Remove the agent name if the response starts with it
         response = re.sub(rf"^\s*\[.*]:", "", response).strip()  # noqa: F541

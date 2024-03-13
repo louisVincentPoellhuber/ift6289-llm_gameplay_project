@@ -39,6 +39,7 @@ console = Console()
 # Print ascii art
 console.print(ASCII_ART, style="bold dark_orange3")
 
+exit_cli=False
 # Initialize model
 model_cmd = prompt(
                 [("class:message", "Choose your model (c/g/q) > ")],

@@ -1,0 +1,80 @@
+[
+    {
+        "agent_name": "Moderator",
+        "content": "Host: The game now starts.",
+        "turn": 0,
+        "timestamp": "1710440861064721000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Moderator",
+        "content": "Your word is: Basketball. Remember it for the next rounds.",
+        "turn": 0,
+        "timestamp": "1710440861064721000",
+        "visible_to": [
+            "Nancy",
+            "Tom",
+            "Cindy",
+            "Rose",
+            "Edward"
+        ],
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Moderator",
+        "content": "Your word is: Soccer. Remember it for the next rounds.",
+        "turn": 0,
+        "timestamp": "1710440861064721000",
+        "visible_to": "Jack",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Moderator",
+        "content": "Host: Now it's the describing stage, players have to say something about the received word without directly saying it.You cannot repeat what others has said. We will start with Nancy.",
+        "turn": 0,
+        "timestamp": "1710440861064721000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Nancy",
+        "content": "```json\n{\n  \"word\": \"Basketball\",\n  \"arguments\": \"Sports lovers, picture a fast-paced game where tall baskets dominate the arena.\"\n}\n```",
+        "turn": 1,
+        "timestamp": "1710440861064721000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Tom",
+        "content": "Host: Thank you, Nancy. That was an interesting description. Let's move on to Ken. Remember, no repeating Nancy's description!",
+        "turn": 2,
+        "timestamp": "1710440861064721000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Cindy",
+        "content": "```json\n{\n  \"word\": \"football\",\n  \"arguments\": \"Imagine a hectic green field battle where soldiers wear helmets and charge at each other.\"\n}\n```",
+        "turn": 3,
+        "timestamp": "1710440861064721000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Jack",
+        "content": "```json\n{\n  \"word\": \"Soccer\",\n  \"arguments\": \"This sport brings nations together, and its global appeal transcends language barriers. Picture a passionate crowd cheering on their country, united under the universal language of football.\"\n}\n```",
+        "turn": 4,
+        "timestamp": "1710440861064721000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Rose",
+        "content": "```json\n{\n  \"word\": \"Basketball\",\n  \"arguments\": \"For this sport, you need height and agility. Think of a game that requires quick reflexes and the ability to reach new heights.\"\n}\n```",
+        "turn": 5,
+        "timestamp": "1710440861064721000",
+        "visible_to": "all",
+        "msg_type": "text"
+    }
+]

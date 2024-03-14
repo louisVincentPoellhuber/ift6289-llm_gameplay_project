@@ -125,9 +125,7 @@ class CohereAIChat(IntelligenceBackend):
         # Concatenate all new messages into one message because the Cohere API only accepts one message
         new_message = "\n".join(new_conversations)
 
-        #persona_prompt = [{"": f"Environment:\n{global_prompt}\n\nYour role:\n{role_desc}"}]
-
-
+        # persona_prompt = [{"": f"Environment:\n{global_prompt}\n\nYour role:\n{role_desc}"}]
 
         # print("context:", context)
         persona_prompt = context.copy()

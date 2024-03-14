@@ -199,7 +199,12 @@ class SpyFall(Environment):
         assert (
             player_name == self.get_next_player()
         ), f"Wrong player! It is {self.get_next_player()} turn."
+
         if self._current_phase == "give clues":
+
+            ## PARSE RESPONSE see askguess
+            # print("Content action:", action)
+
             message = Message(
                 agent_name=player_name, content=action, turn=self._current_turn
             )
@@ -222,6 +227,7 @@ class SpyFall(Environment):
                 reward=self.get_zero_rewards(),
                 terminal=False,
             )  # Return all the messages
+
         elif self._current_phase == "accuse":
             message = Message(
                 agent_name=player_name,
@@ -229,8 +235,10 @@ class SpyFall(Environment):
                 turn=self._current_turn,
                 visible_to=[player_name],
             )
+
             self.message_pool.append_message(message)
             vote = self._text2vote(action)
+
             if vote in self.player_names:
                 self._players_votes[vote] += 1
 

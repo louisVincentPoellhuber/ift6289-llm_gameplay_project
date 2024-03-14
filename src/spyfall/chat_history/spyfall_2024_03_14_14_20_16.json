@@ -1,0 +1,80 @@
+[
+    {
+        "agent_name": "Moderator",
+        "content": "Host: The game now starts.",
+        "turn": 0,
+        "timestamp": "1710440408148948000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Moderator",
+        "content": "Your word is: Tiger. Remember it for the next rounds.",
+        "turn": 0,
+        "timestamp": "1710440408148948000",
+        "visible_to": [
+            "Tom",
+            "Cindy",
+            "Jack",
+            "Rose",
+            "Edward"
+        ],
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Moderator",
+        "content": "Your word is: Lion. Remember it for the next rounds.",
+        "turn": 0,
+        "timestamp": "1710440408148948000",
+        "visible_to": "Nancy",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Moderator",
+        "content": "Host: Now it's the describing stage, players have to say something about the received word without directly saying it.You cannot repeat what others has said. We will start with Nancy.",
+        "turn": 0,
+        "timestamp": "1710440408148948000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Nancy",
+        "content": "```json\n{\n  \"word\": \"Lion\",\n  \"arguments\": \"I see the king of the jungle in my mind, a majestic and powerful creature with a golden mane and a proud walk. Roars loudly!\"\n}\n```",
+        "turn": 1,
+        "timestamp": "1710440408148948000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Tom",
+        "content": "```json\n{\n  \"word\": \"Tiger\",\n  \"arguments\": \"There's a fierce predator lurking in the tall grass, with stripes and a powerful bite. It's a stealthy hunter, and very hard to spot!\"\n}\n```",
+        "turn": 2,
+        "timestamp": "1710440408148948000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Cindy",
+        "content": "```json\n{\n  \"word\": \"Zebra\",\n  \"arguments\": \"This animal is a black and white stripe expert. You can find them in the wild, running in herds, with an distinctive pattern and unique way of moving.\"\n}\n```",
+        "turn": 3,
+        "timestamp": "1710440408148948000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Jack",
+        "content": "```json\n{\n  \"word\": \"Tiger\",\n  \"arguments\": \"The hidden camoflauge expert, this animal moves silently and quickly. It's hard to see the stripes because they blend so well in the vegetation!\"\n}\n```",
+        "turn": 4,
+        "timestamp": "1710440408148948000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Rose",
+        "content": "```json\n{\n  \"word\": \"Giraffe\",\n  \"arguments\": \"A tall, long-necked friend, with a spotty pattern and a curious gaze. This animal spends a lot of time observing the world from above.\"\n}\n```",
+        "turn": 5,
+        "timestamp": "1710440408148948000",
+        "visible_to": "all",
+        "msg_type": "text"
+    }
+]

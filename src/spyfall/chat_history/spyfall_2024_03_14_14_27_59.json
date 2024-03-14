@@ -1,0 +1,80 @@
+[
+    {
+        "agent_name": "Moderator",
+        "content": "Host: The game now starts.",
+        "turn": 0,
+        "timestamp": "1710440874623090000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Moderator",
+        "content": "Your word is: Watermelon. Remember it for the next rounds.",
+        "turn": 0,
+        "timestamp": "1710440874623090000",
+        "visible_to": [
+            "Nancy",
+            "Tom",
+            "Cindy",
+            "Jack",
+            "Edward"
+        ],
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Moderator",
+        "content": "Your word is: Melon. Remember it for the next rounds.",
+        "turn": 0,
+        "timestamp": "1710440874623090000",
+        "visible_to": "Rose",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Moderator",
+        "content": "Host: Now it's the describing stage, players have to say something about the received word without directly saying it.You cannot repeat what others has said. We will start with Nancy.",
+        "turn": 0,
+        "timestamp": "1710440874623090000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Nancy",
+        "content": "```json\n{\n  \"word\": \"Watermelon\",\n  \"arguments\": \"This fruit is green and it has seeds and it's juicy too. But it's not a lemon or a lime!\"\n}\n```",
+        "turn": 1,
+        "timestamp": "1710440874623090000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Tom",
+        "content": "Host: Interesting. Now we continue to Jason.",
+        "turn": 2,
+        "timestamp": "1710440874623090000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Cindy",
+        "content": "```json\n{\n  \"word\": \"Apple\",\n  \"arguments\": \"I received a fruit that's juicy and sweet, and it's a classic snack for kids and grown-ups alike! It's also commonly used to represent knowledge and wisdom.\"\n}\n```",
+        "turn": 3,
+        "timestamp": "1710440874623090000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Jack",
+        "content": "```json\n{\n  \"word\": \"Watermelon\",\n  \"arguments\": \"Someone described a fruit that's both sweet and refreshing, and often enjoyed as a summer treat. It's not as acidic as some other fruits and has a distinctive green colour.\"\n}\n```",
+        "turn": 4,
+        "timestamp": "1710440874623090000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Rose",
+        "content": "```json\n{\n  \"word\": \"Orange\",\n  \"arguments\": \"I have a juicy citrus fruit that's a common ingredient in many desserts and drinks. It's a healthy snack and also a colour!\"\n}\n```",
+        "turn": 5,
+        "timestamp": "1710440874623090000",
+        "visible_to": "all",
+        "msg_type": "text"
+    }
+]

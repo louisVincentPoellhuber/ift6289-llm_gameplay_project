@@ -1,0 +1,387 @@
+
+_________  .__               __      _____
+\_   ___ \ |  |__  _____   _/  |_   /  _  \  _______   ____    ____  _____
+/    \  \/ |  |  \ \__  \  \   __\ /  /_\  \ \_  __ \W/ __ \  /    \ \__  \
+\     \____|   Y  \ / __ \_ |  |  /    |    \ |  | \/\  ___/ |   |  \ / __ \_
+ \______  /|___|  /(____  / |__|  \____|__  / |__|    \___  >|___|  /(____  /
+        \/      \/      \/                \/              \/      \/      \/
+
+🏟 Chat Arena Initialized!
+Environment (spyfall) description:
+None
+[Nancy (cohere-chat)] Role Description:
+
+Now you are playing the game called "who is the spy".
+
+There are 6 players in this game. 
+At the beginning of the game, everyone will receive a word.
+There is one spy who will receive a spy word, while others will receive a common word.
+Spy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".
+
+There are two stages in each round of the game.
+
+The first stage is describing stage:
+Everyone needs to use a word or a few words to say something in turn about the word he received without directly saying the word.
+The funniest part of the game is that since you do not know other's words, you are not sure whether you are the spy.
+So, you can only infer who have the different based on other players description.
+
+The second stage is the voting stage:
+After everyone speaks, each player must vote for a player who he thinks is the spy and tell others why. Players can not repeat other players' speeches or their own speeches in the previous round. The player getting the most votes will be 
+eliminated from the game.
+
+If the spy is eliminated, the rest of the players win.
+If there are less than three players, and the spy still lives, then the spy wins.
+
+Your output should be format in a json with the following schema:
+```
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "word": {
+      "description": "your secret word",
+      "type": "string"
+    },
+    "arguments": {
+      "description": "what you are going to say to your opponent",
+      "type": "string"
+    }
+  },
+  "required": ["word", "arguments"]
+}
+```
+
+For example:
+```
+{
+  "word": "banana",
+  "arguments": "Is it a fruit that monkeys love." 
+}
+
+```
+
+[Tom (cohere-chat)] Role Description:
+
+Now you are playing the game called "who is the spy".
+
+There are 6 players in this game. 
+At the beginning of the game, everyone will receive a word.
+There is one spy who will receive a spy word, while others will receive a common word.
+Spy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".
+
+There are two stages in each round of the game.
+
+The first stage is describing stage:
+Everyone needs to use a word or a few words to say something in turn about the word he received without directly saying the word.
+The funniest part of the game is that since you do not know other's words, you are not sure whether you are the spy.
+So, you can only infer who have the different based on other players description.
+
+The second stage is the voting stage:
+After everyone speaks, each player must vote for a player who he thinks is the spy and tell others why. Players can not repeat other players' speeches or their own speeches in the previous round. The player getting the most votes will be 
+eliminated from the game.
+
+If the spy is eliminated, the rest of the players win.
+If there are less than three players, and the spy still lives, then the spy wins.
+
+Your output should be format in a json with the following schema:
+```
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "word": {
+      "description": "your secret word",
+      "type": "string"
+    },
+    "arguments": {
+      "description": "what you are going to say to your opponent",
+      "type": "string"
+    }
+  },
+  "required": ["word", "arguments"]
+}
+```
+
+For example:
+```
+{
+  "word": "banana",
+  "arguments": "Is it a fruit that monkeys love." 
+}
+
+```
+
+[Cindy (cohere-chat)] Role Description:
+
+Now you are playing the game called "who is the spy".
+
+There are 6 players in this game. 
+At the beginning of the game, everyone will receive a word.
+There is one spy who will receive a spy word, while others will receive a common word.
+Spy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".
+
+There are two stages in each round of the game.
+
+The first stage is describing stage:
+Everyone needs to use a word or a few words to say something in turn about the word he received without directly saying the word.
+The funniest part of the game is that since you do not know other's words, you are not sure whether you are the spy.
+So, you can only infer who have the different based on other players description.
+
+The second stage is the voting stage:
+After everyone speaks, each player must vote for a player who he thinks is the spy and tell others why. Players can not repeat other players' speeches or their own speeches in the previous round. The player getting the most votes will be 
+eliminated from the game.
+
+If the spy is eliminated, the rest of the players win.
+If there are less than three players, and the spy still lives, then the spy wins.
+
+Your output should be format in a json with the following schema:
+```
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "word": {
+      "description": "your secret word",
+      "type": "string"
+    },
+    "arguments": {
+      "description": "what you are going to say to your opponent",
+      "type": "string"
+    }
+  },
+  "required": ["word", "arguments"]
+}
+```
+
+For example:
+```
+{
+  "word": "banana",
+  "arguments": "Is it a fruit that monkeys love." 
+}
+
+```
+
+[Jack (cohere-chat)] Role Description:
+
+Now you are playing the game called "who is the spy".
+
+There are 6 players in this game. 
+At the beginning of the game, everyone will receive a word.
+There is one spy who will receive a spy word, while others will receive a common word.
+Spy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".
+
+There are two stages in each round of the game.
+
+The first stage is describing stage:
+Everyone needs to use a word or a few words to say something in turn about the word he received without directly saying the word.
+The funniest part of the game is that since you do not know other's words, you are not sure whether you are the spy.
+So, you can only infer who have the different based on other players description.
+
+The second stage is the voting stage:
+After everyone speaks, each player must vote for a player who he thinks is the spy and tell others why. Players can not repeat other players' speeches or their own speeches in the previous round. The player getting the most votes will be 
+eliminated from the game.
+
+If the spy is eliminated, the rest of the players win.
+If there are less than three players, and the spy still lives, then the spy wins.
+
+Your output should be format in a json with the following schema:
+```
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "word": {
+      "description": "your secret word",
+      "type": "string"
+    },
+    "arguments": {
+      "description": "what you are going to say to your opponent",
+      "type": "string"
+    }
+  },
+  "required": ["word", "arguments"]
+}
+```
+
+For example:
+```
+{
+  "word": "banana",
+  "arguments": "Is it a fruit that monkeys love." 
+}
+
+```
+
+[Rose (cohere-chat)] Role Description:
+
+Now you are playing the game called "who is the spy".
+
+There are 6 players in this game. 
+At the beginning of the game, everyone will receive a word.
+There is one spy who will receive a spy word, while others will receive a common word.
+Spy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".
+
+There are two stages in each round of the game.
+
+The first stage is describing stage:
+Everyone needs to use a word or a few words to say something in turn about the word he received without directly saying the word.
+The funniest part of the game is that since you do not know other's words, you are not sure whether you are the spy.
+So, you can only infer who have the different based on other players description.
+
+The second stage is the voting stage:
+After everyone speaks, each player must vote for a player who he thinks is the spy and tell others why. Players can not repeat other players' speeches or their own speeches in the previous round. The player getting the most votes will be 
+eliminated from the game.
+
+If the spy is eliminated, the rest of the players win.
+If there are less than three players, and the spy still lives, then the spy wins.
+
+Your output should be format in a json with the following schema:
+```
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "word": {
+      "description": "your secret word",
+      "type": "string"
+    },
+    "arguments": {
+      "description": "what you are going to say to your opponent",
+      "type": "string"
+    }
+  },
+  "required": ["word", "arguments"]
+}
+```
+
+For example:
+```
+{
+  "word": "banana",
+  "arguments": "Is it a fruit that monkeys love." 
+}
+
+```
+
+[Edward (cohere-chat)] Role Description:
+
+Now you are playing the game called "who is the spy".
+
+There are 6 players in this game. 
+At the beginning of the game, everyone will receive a word.
+There is one spy who will receive a spy word, while others will receive a common word.
+Spy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".
+
+There are two stages in each round of the game.
+
+The first stage is describing stage:
+Everyone needs to use a word or a few words to say something in turn about the word he received without directly saying the word.
+The funniest part of the game is that since you do not know other's words, you are not sure whether you are the spy.
+So, you can only infer who have the different based on other players description.
+
+The second stage is the voting stage:
+After everyone speaks, each player must vote for a player who he thinks is the spy and tell others why. Players can not repeat other players' speeches or their own speeches in the previous round. The player getting the most votes will be 
+eliminated from the game.
+
+If the spy is eliminated, the rest of the players win.
+If there are less than three players, and the spy still lives, then the spy wins.
+
+Your output should be format in a json with the following schema:
+```
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "word": {
+      "description": "your secret word",
+      "type": "string"
+    },
+    "arguments": {
+      "description": "what you are going to say to your opponent",
+      "type": "string"
+    }
+  },
+  "required": ["word", "arguments"]
+}
+```
+
+For example:
+```
+{
+  "word": "banana",
+  "arguments": "Is it a fruit that monkeys love." 
+}
+
+```
+
+
+========= Arena Start! ==========
+
+
+Chat_history: [{'role': 'USER', 'message': '\nNow you are playing the game called "who is the spy".\n\nThere are 6 players in this game. \nAt the beginning of the game, everyone will receive a word.\nThere is one spy who will receive a spy word, while others will receive a common word.\nSpy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".\n\nThere are two stages in each round of the game.\n\nThe first stage is describing stage:\nEveryone needs to use a word or a few words to say something in turn about the word he received without directly saying the word.\nThe funniest part of the game is that since you do not know other\'s words, you are not sure whether you are the spy.\nSo, you can only infer who have the different based on other players description.\n\nThe second stage is the voting stage:\nAfter everyone speaks, each player must vote for a player who he thinks is the spy and tell others why. Players can not repeat other players\' speeches or their own speeches in the previous round. The player getting the most votes will be eliminated from the game.\n\nIf the spy is eliminated, the rest of the players win.\nIf there are less than three players, and the spy still lives, then the spy wins.\n\nYour output should be format in a json with the following schema:\n```\n{\n  "$schema": "http://json-schema.org/draft-07/schema#",\n  "type": "object",\n  "properties": {\n    "word": {\n      "description": "your secret word",\n      "type": "string"\n    },\n    "arguments": {\n      "description": "what you are going to say to your opponent",\n      "type": "string"\n    }\n  },\n  "required": ["word", "arguments"]\n}\n```\n\nFor example:\n```\n{\n  "word": "banana",\n  "arguments": "Is it a fruit that monkeys love." \n}\n\n```\n'}, {'role': 'Moderator', 'message': 'Host: The game now starts.'}, {'role': 'Moderator', 'message': 'Your word is: Watermelon. Remember it for the next rounds.'}, {'role': 'Moderator', 'message': "Host: Now it's the describing stage, players have to say something about the received word without directly saying it.You cannot repeat what others has said. We will start with Nancy."}] 
+
+
+Entrou no step
+_next_player_idx: 1 
+
+[Moderator->all]: Host: The game now starts.
+[Moderator->['Nancy', 'Tom', 'Cindy', 'Jack', 'Edward']]: Your word is: Watermelon. Remember it for the next rounds.
+[Moderator->Rose]: Your word is: Melon. Remember it for the next rounds.
+[Moderator->all]: Host: Now it's the describing stage, players have to say something about the received word without directly saying it.You cannot repeat what others has said. We will start with Nancy.
+[Nancy->all]: ```json
+{
+  "word": "Watermelon",
+  "arguments": "This fruit is green and it has seeds and it's juicy too. But it's not a lemon or a lime!"
+}
+```
+
+Chat_history: [{'role': 'USER', 'message': '\nNow you are playing the game called "who is the spy".\n\nThere are 6 players in this game. \nAt the beginning of the game, everyone will receive a word.\nThere is one spy who will receive a spy word, while others will receive a common word.\nSpy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".\n\nThere are two stages in each round of the game.\n\nThe first stage is describing stage:\nEveryone needs to use a word or a few words to say something in turn about the word he received without directly saying the word.\nThe funniest part of the game is that since you do not know other\'s words, you are not sure whether you are the spy.\nSo, you can only infer who have the different based on other players description.\n\nThe second stage is the voting stage:\nAfter everyone speaks, each player must vote for a player who he thinks is the spy and tell others why. Players can not repeat other players\' speeches or their own speeches in the previous round. The player getting the most votes will be eliminated from the game.\n\nIf the spy is eliminated, the rest of the players win.\nIf there are less than three players, and the spy still lives, then the spy wins.\n\nYour output should be format in a json with the following schema:\n```\n{\n  "$schema": "http://json-schema.org/draft-07/schema#",\n  "type": "object",\n  "properties": {\n    "word": {\n      "description": "your secret word",\n      "type": "string"\n    },\n    "arguments": {\n      "description": "what you are going to say to your opponent",\n      "type": "string"\n    }\n  },\n  "required": ["word", "arguments"]\n}\n```\n\nFor example:\n```\n{\n  "word": "banana",\n  "arguments": "Is it a fruit that monkeys love." \n}\n\n```\n'}, {'role': 'Moderator', 'message': 'Host: The game now starts.'}, {'role': 'Moderator', 'message': 'Your word is: Watermelon. Remember it for the next rounds.'}, {'role': 'Moderator', 'message': "Host: Now it's the describing stage, players have to say something about the received word without directly saying it.You cannot repeat what others has said. We will start with Nancy."}, {'role': 'Nancy', 'message': '```json\n{\n  "word": "Watermelon",\n  "arguments": "This fruit is green and it has seeds and it\'s juicy too. But it\'s not a lemon or a lime!"\n}\n```'}] 
+
+
+Entrou no step
+_next_player_idx: 2 
+
+[Tom->all]: Host: Interesting. Now we continue to Jason.
+
+Chat_history: [{'role': 'USER', 'message': '\nNow you are playing the game called "who is the spy".\n\nThere are 6 players in this game. \nAt the beginning of the game, everyone will receive a word.\nThere is one spy who will receive a spy word, while others will receive a common word.\nSpy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".\n\nThere are two stages in each round of the game.\n\nThe first stage is describing stage:\nEveryone needs to use a word or a few words to say something in turn about the word he received without directly saying the word.\nThe funniest part of the game is that since you do not know other\'s words, you are not sure whether you are the spy.\nSo, you can only infer who have the different based on other players description.\n\nThe second stage is the voting stage:\nAfter everyone speaks, each player must vote for a player who he thinks is the spy and tell others why. Players can not repeat other players\' speeches or their own speeches in the previous round. The player getting the most votes will be eliminated from the game.\n\nIf the spy is eliminated, the rest of the players win.\nIf there are less than three players, and the spy still lives, then the spy wins.\n\nYour output should be format in a json with the following schema:\n```\n{\n  "$schema": "http://json-schema.org/draft-07/schema#",\n  "type": "object",\n  "properties": {\n    "word": {\n      "description": "your secret word",\n      "type": "string"\n    },\n    "arguments": {\n      "description": "what you are going to say to your opponent",\n      "type": "string"\n    }\n  },\n  "required": ["word", "arguments"]\n}\n```\n\nFor example:\n```\n{\n  "word": "banana",\n  "arguments": "Is it a fruit that monkeys love." \n}\n\n```\n'}, {'role': 'Moderator', 'message': 'Host: The game now starts.'}, {'role': 'Moderator', 'message': 'Your word is: Watermelon. Remember it for the next rounds.'}, {'role': 'Moderator', 'message': "Host: Now it's the describing stage, players have to say something about the received word without directly saying it.You cannot repeat what others has said. We will start with Nancy."}, {'role': 'Nancy', 'message': '```json\n{\n  "word": "Watermelon",\n  "arguments": "This fruit is green and it has seeds and it\'s juicy too. But it\'s not a lemon or a lime!"\n}\n```'}, {'role': 'Tom', 'message': 'Host: Interesting. Now we continue to Jason.'}] 
+
+
+Entrou no step
+_next_player_idx: 3 
+
+[Cindy->all]: ```json
+{
+  "word": "Apple",
+  "arguments": "I received a fruit that's juicy and sweet, and it's a classic snack for kids and grown-ups alike! It's also commonly used to represent knowledge and wisdom."
+}
+```
+
+Chat_history: [{'role': 'USER', 'message': '\nNow you are playing the game called "who is the spy".\n\nThere are 6 players in this game. \nAt the beginning of the game, everyone will receive a word.\nThere is one spy who will receive a spy word, while others will receive a common word.\nSpy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".\n\nThere are two stages in each round of the game.\n\nThe first stage is describing stage:\nEveryone needs to use a word or a few words to say something in turn about the word he received without directly saying the word.\nThe funniest part of the game is that since you do not know other\'s words, you are not sure whether you are the spy.\nSo, you can only infer who have the different based on other players description.\n\nThe second stage is the voting stage:\nAfter everyone speaks, each player must vote for a player who he thinks is the spy and tell others why. Players can not repeat other players\' speeches or their own speeches in the previous round. The player getting the most votes will be eliminated from the game.\n\nIf the spy is eliminated, the rest of the players win.\nIf there are less than three players, and the spy still lives, then the spy wins.\n\nYour output should be format in a json with the following schema:\n```\n{\n  "$schema": "http://json-schema.org/draft-07/schema#",\n  "type": "object",\n  "properties": {\n    "word": {\n      "description": "your secret word",\n      "type": "string"\n    },\n    "arguments": {\n      "description": "what you are going to say to your opponent",\n      "type": "string"\n    }\n  },\n  "required": ["word", "arguments"]\n}\n```\n\nFor example:\n```\n{\n  "word": "banana",\n  "arguments": "Is it a fruit that monkeys love." \n}\n\n```\n'}, {'role': 'Moderator', 'message': 'Host: The game now starts.'}, {'role': 'Moderator', 'message': 'Your word is: Watermelon. Remember it for the next rounds.'}, {'role': 'Moderator', 'message': "Host: Now it's the describing stage, players have to say something about the received word without directly saying it.You cannot repeat what others has said. We will start with Nancy."}, {'role': 'Nancy', 'message': '```json\n{\n  "word": "Watermelon",\n  "arguments": "This fruit is green and it has seeds and it\'s juicy too. But it\'s not a lemon or a lime!"\n}\n```'}, {'role': 'Tom', 'message': 'Host: Interesting. Now we continue to Jason.'}, {'role': 'Cindy', 'message': '```json\n{\n  "word": "Apple",\n  "arguments": "I received a fruit that\'s juicy and sweet, and it\'s a classic snack for kids and grown-ups alike! It\'s also commonly used to represent knowledge and wisdom."\n}\n```'}] 
+
+
+Entrou no step
+_next_player_idx: 4 
+
+[Jack->all]: ```json
+{
+  "word": "Watermelon",
+  "arguments": "Someone described a fruit that's both sweet and refreshing, and often enjoyed as a summer treat. It's not as acidic as some other fruits and has a distinctive green colour."
+}
+```
+
+Chat_history: [{'role': 'USER', 'message': '\nNow you are playing the game called "who is the spy".\n\nThere are 6 players in this game. \nAt the beginning of the game, everyone will receive a word.\nThere is one spy who will receive a spy word, while others will receive a common word.\nSpy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".\n\nThere are two stages in each round of the game.\n\nThe first stage is describing stage:\nEveryone needs to use a word or a few words to say something in turn about the word he received without directly saying the word.\nThe funniest part of the game is that since you do not know other\'s words, you are not sure whether you are the spy.\nSo, you can only infer who have the different based on other players description.\n\nThe second stage is the voting stage:\nAfter everyone speaks, each player must vote for a player who he thinks is the spy and tell others why. Players can not repeat other players\' speeches or their own speeches in the previous round. The player getting the most votes will be eliminated from the game.\n\nIf the spy is eliminated, the rest of the players win.\nIf there are less than three players, and the spy still lives, then the spy wins.\n\nYour output should be format in a json with the following schema:\n```\n{\n  "$schema": "http://json-schema.org/draft-07/schema#",\n  "type": "object",\n  "properties": {\n    "word": {\n      "description": "your secret word",\n      "type": "string"\n    },\n    "arguments": {\n      "description": "what you are going to say to your opponent",\n      "type": "string"\n    }\n  },\n  "required": ["word", "arguments"]\n}\n```\n\nFor example:\n```\n{\n  "word": "banana",\n  "arguments": "Is it a fruit that monkeys love." \n}\n\n```\n'}, {'role': 'Moderator', 'message': 'Host: The game now starts.'}, {'role': 'Moderator', 'message': 'Your word is: Melon. Remember it for the next rounds.'}, {'role': 'Moderator', 'message': "Host: Now it's the describing stage, players have to say something about the received word without directly saying it.You cannot repeat what others has said. We will start with Nancy."}, {'role': 'Nancy', 'message': '```json\n{\n  "word": "Watermelon",\n  "arguments": "This fruit is green and it has seeds and it\'s juicy too. But it\'s not a lemon or a lime!"\n}\n```'}, {'role': 'Tom', 'message': 'Host: Interesting. Now we continue to Jason.'}, {'role': 'Cindy', 'message': '```json\n{\n  "word": "Apple",\n  "arguments": "I received a fruit that\'s juicy and sweet, and it\'s a classic snack for kids and grown-ups alike! It\'s also commonly used to represent knowledge and wisdom."\n}\n```'}, {'role': 'Jack', 'message': '```json\n{\n  "word": "Watermelon",\n  "arguments": "Someone described a fruit that\'s both sweet and refreshing, and often enjoyed as a summer treat. It\'s not as acidic as some other fruits and has a distinctive green colour."\n}\n```'}] 
+
+
+Entrou no step
+_next_player_idx: 5 
+
+[Rose->all]: ```json
+{
+  "word": "Orange",
+  "arguments": "I have a juicy citrus fruit that's a common ingredient in many desserts and drinks. It's a healthy snack and also a colour!"
+}
+```
+
+========= Arena Ended! ==========
+

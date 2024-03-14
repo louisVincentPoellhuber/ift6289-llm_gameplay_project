@@ -221,6 +221,7 @@ class Chameleon(Environment):
         assert (
             player_name == self.get_next_player()
         ), f"Wrong player! It is {self.get_next_player()} turn."
+        
         if self._current_phase == "give clues":
             message = Message(
                 agent_name=player_name, content=action, turn=self._current_turn
@@ -245,6 +246,7 @@ class Chameleon(Environment):
                 reward=self.get_zero_rewards(),
                 terminal=False,
             )  # Return all the messages
+            
         elif self._current_phase == "accuse":
             message = Message(
                 agent_name=player_name,

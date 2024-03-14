@@ -4,6 +4,8 @@ import cohere
 from time import strftime
 from dotenv import load_dotenv
 
+sys.stdout = open("output_spyfall.txt", "w")
+
 # Loading dotenv
 load_dotenv()
 
@@ -101,7 +103,7 @@ players = ["Nancy", "Tom", "Cindy", "Jack", "Rose", "Edward"]
 # Running experiment
 env = SpyFall(player_names=players)
 arena = Arena([player_0, player_1, player_2, player_3, player_4, player_5], env)
-arena.launch_cli(interactive=False)
+arena.launch_cli(interactive=False, max_steps=10)
 
 # Saving history
 arena.save_history(

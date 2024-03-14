@@ -4,7 +4,7 @@ pandas
 torch
 
 # LLM
-chatarena
+# chatarena
 openai
 cohere==4.53
 # TODO add other LLM libraires here

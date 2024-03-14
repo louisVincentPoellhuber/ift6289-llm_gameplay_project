@@ -8,51 +8,23 @@ from .base import Environment, TimeStep, register_env
 
 DEFAULT_TOPIC_CODES = {
     "Fruits": [
-        "Apple",
-        "Banana",
-        "Orange",
-        "Grape",
-        "Strawberry",
-        "Pineapple",
-        "Mango",
+        "Melon",
         "Watermelon",
     ],
     "Animals": [
         "Lion",
-        "Elephant",
-        "Giraffe",
-        "Monkey",
-        "Zebra",
         "Tiger",
-        "Bear",
-        "Kangaroo",
     ],
     "Sports": [
         "Soccer",
         "Basketball",
-        "Tennis",
-        "Baseball",
-        "Swimming",
-        "Cycling",
-        "Volleyball",
-        "Golf",
-    ],
-    "Countries": [
-        "United States",
-        "Canada",
-        "Brazil",
-        "United Kingdom",
-        "France",
-        "Germany",
-        "Japan",
-        "Australia",
     ],
 }
 
 
 @register_env
 class SpyFall(Environment):
-    type_name = "chameleon"
+    type_name = "spyfall"
 
     def __init__(
         self,
@@ -69,11 +41,11 @@ class SpyFall(Environment):
         # The "state" of the environment is maintained by the message pool
         self.message_pool = MessagePool()
 
-        # Randomly sample a topic, code and chameleon player
+        # Randomly sample a topic, code and spy player
         self.topic = None
         self.code = None
-        self.chameleon_name = None
-        self.non_chameleon_names = None
+        self.spy_name = None
+        self.non_spy_names = None
 
         # Game states
         self._current_turn = 0
@@ -82,23 +54,25 @@ class SpyFall(Environment):
         self._players_votes = None
         self._initialized = False
 
-        self.reset()  # To initialize the game (select topic, code, chameleon)
+        self.reset()  # To initialize the game (select topic, code, spy)
 
     def get_next_player(self) -> str:
         """Get the next player."""
         if self._current_phase != "guess":
             return self.player_names[self._next_player_idx]
         else:
-            return self.chameleon_name
+            return self.spy_name
 
     def reset(self):
-        """Sample topic, code and chameleon code."""
+        """Sample topic, code and spy code."""
         self.topic = random.choice(list(self.topic_codes.keys()))
         self.code = random.choice(self.topic_codes[self.topic])
-        self.chameleon_name = random.choice(self.player_names)
-        self.non_chameleon_names = [
-            name for name in self.player_names if name != self.chameleon_name
+        self.spy_name = random.choice(self.player_names)
+        self.non_spy_names = [
+            name for name in self.player_names if name != self.spy_name
         ]
+        self.spy_word = self.topic_codes[self.topic][0]
+        self.non_spy_word = self.topic_codes[self.topic][1]
 
         self._current_turn = 0
         self._next_player_idx = 0
@@ -106,14 +80,17 @@ class SpyFall(Environment):
 
         self.message_pool.reset()
 
-        self._moderator_speak(f"Now the game starts! The topic is: {self.topic}")
+        self._moderator_speak(f"Host: The game now starts.")
         self._moderator_speak(
-            f"You are not chameleon. The word is: {self.code}",
-            visible_to=self.non_chameleon_names,
+            f"Your word is: {self.non_spy_word}. Remember it for the next rounds.",
+            visible_to=self.non_spy_names,
         )
-        self._moderator_speak("You are the chameleon!", visible_to=self.chameleon_name)
         self._moderator_speak(
-            "Now everyone gives one clue (but don't give away the secret word). "
+            f"Your word is: {self.spy_word}.  Remember it for the next rounds.",
+            visible_to=self.spy_name,
+        )
+        self._moderator_speak(
+            "Host: Now it's the describing stage, players have to say something about the received word without directly saying it."
             f"You cannot repeat what others has said. We will start with {self.player_names[0]}."
         )
         self._current_turn = 1
@@ -187,12 +164,12 @@ class SpyFall(Environment):
         )
         self.message_pool.append_message(message)
 
-    def get_rewards(self, chameleon_win: bool) -> Dict[str, float]:
+    def get_rewards(self, spy_win: bool) -> Dict[str, float]:
         """Get rewards for each player."""
         rewards = {}
         for name in self.player_names:
             # The winner gets 1, the loser gets 0
-            rewards[name] = float((name == self.chameleon_name) == chameleon_win)
+            rewards[name] = float((name == self.spy_name) == spy_win)
 
         return rewards
 
@@ -217,7 +194,7 @@ class SpyFall(Environment):
             self.reset()
 
         # self.message_pool.print()
-        # print(f"Chameleon: {self.chameleon_name}, Code: {self.code}, Topic: {self.topic}")
+        # print(f"spy: {self.spy_name}, Code: {self.code}, Topic: {self.topic}")
         assert (
             player_name == self.get_next_player()
         ), f"Wrong player! It is {self.get_next_player()} turn."
@@ -235,8 +212,7 @@ class SpyFall(Environment):
                 self._next_player_idx = 0
                 self._current_phase = "accuse"
                 self._moderator_speak(
-                    "Now vote which of the other players (excluding yourself) is the chameleon. "
-                    "You cannot vote for yourself."
+                    "Host: Now the voting start, please vote for the player you think is the spy and tell the reason why you think he is the spy."
                 )
                 self._current_turn += 1
 
@@ -272,26 +248,26 @@ class SpyFall(Environment):
                         and vote == self._players_votes[max_vote_player]
                     ):
                         accuse_correct, even_vote = False, True
-                if max_vote_player != self.chameleon_name:
+                if max_vote_player != self.spy_name:
                     accuse_correct = False
 
                 if not accuse_correct:
                     if even_vote:
                         self._moderator_speak(
-                            f"There are even votes. The accusation does not stand. "
-                            f"{self.chameleon_name} is the chameleon. {self.chameleon_name} won the game!"
+                            f"There are even votes. The accusation does not stand."
+                            f"{self.spy_name} is the spy. {self.spy_name} won the game!"
                         )
                     else:
                         self._moderator_speak(
-                            f"The most-voted player is {max_vote_player}. The accusation is incorrect. "
-                            f"{self.chameleon_name} is the chameleon. {self.chameleon_name} won the game!"
+                            f"The most-voted player is {max_vote_player}. The accusation is incorrect."
+                            f"{self.spy_name} is the spy. {self.spy_name} won the game!"
                         )
-                    rewards = self.get_rewards(chameleon_win=True)
+                    rewards = self.get_rewards(spy_win=True)
                     terminal = True
                 else:
                     self._moderator_speak(
-                        f"The accusation is correct! {self.chameleon_name} is the chameleon! "
-                        f"Now {self.chameleon_name} can guess the secret code. "
+                        f"The accusation is correct! {self.spy_name} is the spy! "
+                        f"Now {self.spy_name} can guess the secret code. "
                         'You should say: I guess the code is "..."'
                     )
                     self._current_phase = "guess"
@@ -312,16 +288,16 @@ class SpyFall(Environment):
             self.message_pool.append_message(message)
             if self._is_true_code(action):
                 self._moderator_speak(
-                    f"{player_name} guessed the code correctly! The secret word is {self.code}. "
-                    f"{self.chameleon_name} won!"
+                    f"{player_name} guessed the code correctly! "
+                    f"{self.spy_name} won!"
                 )
-                rewards = self.get_rewards(chameleon_win=True)
+                rewards = self.get_rewards(spy_win=True)
             else:
                 self._moderator_speak(
-                    f"{player_name} guessed the code wrong! The secret word is {self.code}. "
-                    f"{self.non_chameleon_names} won!"
+                    f"{player_name} guessed the code wrong! "
+                    f"{self.non_spy_names} won!"
                 )
-                rewards = self.get_rewards(chameleon_win=False)
+                rewards = self.get_rewards(spy_win=False)
             timestep = TimeStep(
                 observation=self.get_observation(), reward=rewards, terminal=True
             )

@@ -1,12 +1,8 @@
 import os
 import sys
 import cohere
-from datetime import datetime
+from time import strftime
 from dotenv import load_dotenv
-from chatarena.arena import Arena
-from chatarena.agent import Player
-from chatarena.backends import CohereAIChat
-from chatarena.environments.spyfall import SpyFall
 
 # Loading dotenv
 load_dotenv()
@@ -14,6 +10,12 @@ load_dotenv()
 # Configuring path from the library
 CHATARENA_PATH = os.getenv("CHATARENA_PATH")
 sys.path.append(CHATARENA_PATH)
+
+from chatarena.arena import Arena
+from chatarena.agent import Player
+from chatarena.backends import CohereAIChat
+from chatarena.environments.spyfall import SpyFall
+
 
 # Starting cohere backend
 client = cohere.Client(os.getenv("COHEREAI_API_KEY"))
@@ -102,4 +104,6 @@ arena = Arena([player_0, player_1, player_2, player_3, player_4, player_5], env)
 arena.launch_cli(interactive=False)
 
 # Saving history
-arena.save_history("test1.json")
+arena.save_history(
+    f"src/spyfall/chat_history/spyfall_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
+)

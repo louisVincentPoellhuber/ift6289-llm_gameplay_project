@@ -1,0 +1,80 @@
+[
+    {
+        "agent_name": "Moderator",
+        "content": "Host: The game now starts.",
+        "turn": 0,
+        "timestamp": "1710427676202233000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Moderator",
+        "content": "Your word is: Tiger. Remember it for the next rounds.",
+        "turn": 0,
+        "timestamp": "1710427676202233000",
+        "visible_to": [
+            "Nancy",
+            "Tom",
+            "Jack",
+            "Rose",
+            "Edward"
+        ],
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Moderator",
+        "content": "Your word is: Lion. Remember it for the next rounds.",
+        "turn": 0,
+        "timestamp": "1710427676202233000",
+        "visible_to": "Cindy",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Moderator",
+        "content": "Host: Now it's the describing stage, players have to say something about the received word without directly saying it.You cannot repeat what others has said. We will start with Nancy.",
+        "turn": 0,
+        "timestamp": "1710427676202233000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Nancy",
+        "content": "```json\n{\n  \"word\": \"Tiger\",\n  \"arguments\": \" Stripes, sharp teeth and a big cat! Can anyone guess what I'm thinking of?\"\n}\n```",
+        "turn": 1,
+        "timestamp": "1710427676202233000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Tom",
+        "content": "Host: Good description! We continue to James. Don't directly say the word, James!",
+        "turn": 2,
+        "timestamp": "1710427676202233000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Cindy",
+        "content": "```json\n{\n  \"word\": \"Lion\",\n  \"arguments\": \"A wild animal with a mighty roar and a majestic appearance, this creature is the king of the jungle!\"\n}\n```",
+        "turn": 3,
+        "timestamp": "1710427676202233000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Jack",
+        "content": "```json\n{\n  \"word\": \"Lion\",\n  \"arguments\": \"Roar! The mighty king strikes again! With a fluffier mane than its cousins, this majestic cat leads the pack.\"\n}\n```",
+        "turn": 4,
+        "timestamp": "1710427676202233000",
+        "visible_to": "all",
+        "msg_type": "text"
+    },
+    {
+        "agent_name": "Rose",
+        "content": "```json\n{\n  \"word\": \"Giraffe\",\n  \"arguments\": \"Tall, spotty, and long-necked, this creature is a close relative of the lions and tigers.\"\n}\n```",
+        "turn": 5,
+        "timestamp": "1710427676202233000",
+        "visible_to": "all",
+        "msg_type": "text"
+    }
+]

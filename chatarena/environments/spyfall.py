@@ -86,7 +86,7 @@ class SpyFall(Environment):
             visible_to=self.non_spy_names,
         )
         self._moderator_speak(
-            f"Your word is: {self.spy_word}.  Remember it for the next rounds.",
+            f"Your word is: {self.spy_word}. Remember it for the next rounds.",
             visible_to=self.spy_name,
         )
         self._moderator_speak(

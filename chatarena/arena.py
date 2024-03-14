@@ -56,7 +56,7 @@ class Arena:
         )  # get the observation for the player
 
         timestep = None
-        for i in range(
+        for i in range( 
             self.invalid_actions_retry
         ):  # try to take an action for a few times
             action = player(observation)  # take an action

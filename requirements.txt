@@ -1,6 +1,7 @@
 # Data handling
 numpy
 pandas
+torch
 
 # LLM
 chatarena
@@ -12,6 +13,8 @@ cohere==4.53
 matplotlib
 seaborn
 
-# any other librairies...
-torch
+# OS stuff
 python-dotenv==1.0.1
+unidecode
+
+# any other librairies...

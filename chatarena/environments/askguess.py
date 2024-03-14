@@ -1,53 +1,123 @@
 import random
+import string
+from unidecode import unidecode
 import re
 from typing import Dict, List, Union
 
 from ..agent import SIGNAL_END_OF_CONVERSATION
 from ..message import Message, MessagePool
 from .base import Environment, TimeStep, register_env
+from ..utils import extract_jsons
 
-DEFAULT_TOPIC_CODES = {
-    "Fruits": [
-        "Apple",
-        "Banana",
-        "Orange",
-        "Grape",
-        "Strawberry",
-        "Pineapple",
-        "Mango",
-        "Watermelon",
-    ],
-    "Animals": [
-        "Lion",
-        "Elephant",
-        "Giraffe",
-        "Monkey",
-        "Zebra",
-        "Tiger",
-        "Bear",
-        "Kangaroo",
-    ],
-    "Sports": [
-        "Soccer",
-        "Basketball",
-        "Tennis",
-        "Baseball",
-        "Swimming",
-        "Cycling",
-        "Volleyball",
-        "Golf",
-    ],
-    "Countries": [
-        "United States",
-        "Canada",
-        "Brazil",
-        "United Kingdom",
-        "France",
-        "Germany",
-        "Japan",
-        "Australia",
-    ],
+DEFAULT_WORD_LIST = [
+            "Apple",
+            "Banana",
+            "Orange",
+            "Grape",
+            "Strawberry",
+            "Pineapple",
+            "Mango",
+            "Watermelon",
+            "Lion",
+            "Elephant",
+            "Giraffe",
+            "Monkey",
+            "Zebra",
+            "Tiger",
+            "Bear",
+            "Kangaroo",
+            "Soccer",
+            "Basketball",
+            "Tennis",
+            "Baseball",
+            "Swimming",
+            "Cycling",
+            "Volleyball",
+            "Golf",
+            "United States",
+            "Canada",
+            "Brazil",
+            "United Kingdom",
+            "France",
+            "Germany",
+            "Japan",
+            "Australia",
+        ]
+
+
+speaker_format_specification = """
+Your output should be format in a json with the following schema:
+```
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "clue": {
+      "description": "a clue hinting at the secret word that you are going to give the guesser",
+      "type": "string"
+    }
+  },
+  "required": ["clue"]
 }
+```
+
+For example:
+```
+{\n  "clue": "The secret word is a hairy animal." \n}
+
+```
+"""
+speaker_role_description = """
+You are the speaker! You will be given a secret word. You you must make your game partner 
+guess your secret word correctly, without saying the word. You will need to give them precise and 
+concise clues hinting at your secret word, excluding the secret word. 
+
+You need to make your partner guess your secret word in as few rounds as possible.
+
+You should never:
+1. Say the secret word
+2. Repeat a clue
+
+"""
+
+guesser_role_description = """
+You are the guesser! You are going to guess a secret word using clues given to you by your game partner. 
+You need to use these clues to guess the secret word. You also need to provide 
+arguments for each of your guesses, to help your partner create better clues. 
+
+You need to make your partner guess your secret word in as few rounds as possible.
+
+You should never:
+1. Repeat a guess
+"""
+
+
+guesser_format_specification = """
+Your output should be format in a json with the following schema:
+```
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "guess": {
+      "description": "a single word, your guess given the clues",
+      "type": "string"
+    }, 
+    "arguments": {
+      "description": "the reasoning behind your guess, why you chose this word",
+      "type": "string"
+    }
+  },
+  "required": ["guess", "arguments"]
+}
+```
+
+For example:
+```
+{\n  "guess": "cat", "arguments": "Since the clue is that the secret word is a hairy animal, my guess is 'cat'." \n}
+
+```
+"""
 
 
 @register_env
@@ -57,48 +127,46 @@ class AskGuess(Environment):
     def __init__(
         self,
         player_names: List[str],
-        topic_codes: Dict[str, List[str]] = None,
+        word_list: List[str] = None,
+        max_turns: int = 10,
         **kwargs,
     ):
-        super().__init__(player_names=player_names, topic_codes=topic_codes, **kwargs)
+        super().__init__(player_names=player_names, word_list=word_list, **kwargs)
 
-        if topic_codes is None:
-            topic_codes = DEFAULT_TOPIC_CODES
-        self.topic_codes = topic_codes
+        if word_list is None:
+            word_list = DEFAULT_WORD_LIST
+        self.word_list = word_list
+        self.word_guess = None
 
         # The "state" of the environment is maintained by the message pool
         self.message_pool = MessagePool()
 
-        # Randomly sample a topic, code and chameleon player
-        self.topic = None
-        self.code = None
-        self.chameleon_name = None
-        self.non_chameleon_names = None
+        # Randomly sample a random word and roles
+        self.word = None
+        self.guesser = None
+        self.speaker = None
 
         # Game states
         self._current_turn = 0
+        self._max_turns = max_turns
         self._next_player_idx = 0
-        self._current_phase = "give clues"  # "give clues", "accuse", "guess"
-        self._players_votes = None
+        self._current_phase = "give clues"  # "give clues", "guess"
         self._initialized = False
 
-        self.reset()  # To initialize the game (select topic, code, chameleon)
+        self.reset()  # To initialize the game (select a random word and roles)
 
     def get_next_player(self) -> str:
         """Get the next player."""
-        if self._current_phase != "guess":
-            return self.player_names[self._next_player_idx]
+        if self._current_phase == "guess":
+            return self.guesser
         else:
-            return self.chameleon_name
+            return self.speaker
 
     def reset(self):
-        """Sample topic, code and chameleon code."""
-        self.topic = random.choice(list(self.topic_codes.keys()))
-        self.code = random.choice(self.topic_codes[self.topic])
-        self.chameleon_name = random.choice(self.player_names)
-        self.non_chameleon_names = [
-            name for name in self.player_names if name != self.chameleon_name
-        ]
+        """Sample a random word and roles."""
+        self.word = random.choice(self.word_list)
+        self.guesser = random.choice(self.player_names)
+        self.speaker = [name for name in self.player_names if name != self.guesser][0]
 
         self._current_turn = 0
         self._next_player_idx = 0
@@ -106,19 +174,17 @@ class AskGuess(Environment):
 
         self.message_pool.reset()
 
-        self._moderator_speak(f"Now the game starts! The topic is: {self.topic}")
-        self._moderator_speak(
-            f"You are not chameleon. The word is: {self.code}",
-            visible_to=self.non_chameleon_names,
+        self._moderator_speak(f"Now the game starts!")
+        self._moderator_speak(speaker_role_description + speaker_format_specification +
+            f"The secret word is: {self.word}",
+            visible_to=self.speaker,
         )
-        self._moderator_speak("You are the chameleon!", visible_to=self.chameleon_name)
+        self._moderator_speak(guesser_role_description+guesser_format_specification, visible_to=self.guesser)
         self._moderator_speak(
-            "Now everyone gives one clue (but don't give away the secret word). "
-            f"You cannot repeat what others has said. We will start with {self.player_names[0]}."
+            "Now the speaker now gives one clue (but don't give away the secret word). "
+            f"You cannot repeat a clue you've already given."
         )
         self._current_turn = 1
-
-        self._players_votes = {name: 0 for name in self.player_names}
 
         self._initialized = True
         init_timestep = TimeStep(
@@ -141,41 +207,48 @@ class AskGuess(Environment):
                 player_name, turn=self._current_turn
             )
 
-    def _text2vote(self, text) -> str:
-        """Convert text to vote, return a player's name."""
-        # lower = text.lower().replace("[", "").replace("]", "").replace(".", "")
+    def _text2guess(self, text) -> str:
+        """Convert text to word guess, return the word guess."""
         text = text.lower()
-        for name in self.player_names:
-            candidates = [
-                name.lower(),
-                name.lower().replace(" ", ""),
-                name.lower().replace(" ", "_"),
-            ]
-            if any([candidate in text for candidate in candidates]):
-                return name
-        return ""
-
-    def _is_true_code(self, text) -> bool:
-        """Check whether the text is the true code."""
-        # Get the word enclosed by quote marks with regex
-        pattern = r"\"(.+?)\""
+        pattern = r'<([^>]*)>'
         match = re.search(pattern, text)
-        if match:
-            return match.group(1).lower().replace(" ", "") == self.code.lower().replace(
-                " ", ""
-            )
-        else:
-            # if no quote marks, check whether the last k words match the code
-            words = text.split()
-            if len(words) >= len(self.code.split()):
-                guessed_term = (
-                    "".join(words[-len(self.code.split()) :]).lower().replace(".", "")
-                )
-                return guessed_term == self.code.lower().replace(" ", "").replace(
-                    ".", ""
-                )
-            else:
-                return False
+
+        return match
+
+    def _normalize_text(self, s):
+        """Lower text and remove punctuation, and extra whitespace."""
+
+        def white_space_fix(text, space_char=" "):
+            return space_char.join(text.split())
+
+        def remove_punc(text):
+            exclude = set(string.punctuation)
+            exclude.add('"')
+            return ''.join(ch for ch in text if ch not in exclude)
+
+        def lower(text):
+            return text.lower()
+        
+        def remove_accents(text):
+            return unidecode(text)
+
+        def apply_funcs(text):
+            text = lower(text)
+            text = remove_punc(text)
+            text = white_space_fix(text, space_char="_")
+            text = remove_accents(text)
+            return text
+
+        return apply_funcs(s)
+
+
+    def _is_true_word(self, guess) -> bool:
+        """Check whether the guess is the true word."""
+        # Get the word enclosed by quote marks with regex
+        guess = self._normalize_text(guess)
+        word = self._normalize_text(self.word)
+        
+        return guess == word
 
     def _moderator_speak(self, text: str, visible_to: Union[str, List[str]] = "all"):
         """Moderator say something."""
@@ -187,12 +260,13 @@ class AskGuess(Environment):
         )
         self.message_pool.append_message(message)
 
-    def get_rewards(self, chameleon_win: bool) -> Dict[str, float]:
+    # TODO: study the impact of point-based rewards or highscore-based rewards
+    def get_rewards(self, correct_guess: bool) -> Dict[str, float]:
         """Get rewards for each player."""
         rewards = {}
         for name in self.player_names:
-            # The winner gets 1, the loser gets 0
-            rewards[name] = float((name == self.chameleon_name) == chameleon_win)
+            # They both get a point if the guesser guessed correctly, or they both get none if not. 
+            rewards[name] = float(correct_guess)
 
         return rewards
 
@@ -216,114 +290,70 @@ class AskGuess(Environment):
         if not self._initialized:
             self.reset()
 
-        # self.message_pool.print()
-        # print(f"Chameleon: {self.chameleon_name}, Code: {self.code}, Topic: {self.topic}")
         assert (
             player_name == self.get_next_player()
         ), f"Wrong player! It is {self.get_next_player()} turn."
         if self._current_phase == "give clues":
+            json_list = extract_jsons(action)
+            if len(json_list) != 1:
+                raise ValueError(f"Player output {action} is not a valid json.")
+
+            clue = json_list[0].get("clue", None)
             message = Message(
-                agent_name=player_name, content=action, turn=self._current_turn
+                agent_name=player_name, content=clue, turn=self._current_turn
             )
             self.message_pool.append_message(message)
 
             # Update the counters
             self._current_turn += 1
             if self._next_player_idx < len(self.player_names) - 1:
-                self._next_player_idx += 1
-            else:
                 self._next_player_idx = 0
-                self._current_phase = "accuse"
+                self._current_phase = "guess"
                 self._moderator_speak(
-                    "Now vote which of the other players (excluding yourself) is the chameleon. "
-                    "You cannot vote for yourself."
+                    "Now, using the clues given so far, try to guess the secret word. You may not guess a word you've previously guessed.",
+                    visible_to=self.guesser,
                 )
-                self._current_turn += 1
+            else:
+                self._next_player_idx += 1
+               
 
             timestep = TimeStep(
                 observation=self.get_observation(),
                 reward=self.get_zero_rewards(),
                 terminal=False,
             )  # Return all the messages
-        elif self._current_phase == "accuse":
-            message = Message(
-                agent_name=player_name,
-                content=action,
-                turn=self._current_turn,
-                visible_to=[player_name],
-            )
-            self.message_pool.append_message(message)
-            vote = self._text2vote(action)
-            if vote in self.player_names:
-                self._players_votes[vote] += 1
-
-            if self._next_player_idx < len(self.player_names) - 1:
-                self._next_player_idx += 1
-                rewards = self.get_zero_rewards()
-                terminal = False
-            else:
-                # print(self._players_votes)
-                accuse_correct, even_vote = True, False
-                max_vote_player = max(self._players_votes, key=self._players_votes.get)
-                # detach if other players has the same number of votes
-                for name, vote in self._players_votes.items():
-                    if (
-                        name != max_vote_player
-                        and vote == self._players_votes[max_vote_player]
-                    ):
-                        accuse_correct, even_vote = False, True
-                if max_vote_player != self.chameleon_name:
-                    accuse_correct = False
-
-                if not accuse_correct:
-                    if even_vote:
-                        self._moderator_speak(
-                            f"There are even votes. The accusation does not stand. "
-                            f"{self.chameleon_name} is the chameleon. {self.chameleon_name} won the game!"
-                        )
-                    else:
-                        self._moderator_speak(
-                            f"The most-voted player is {max_vote_player}. The accusation is incorrect. "
-                            f"{self.chameleon_name} is the chameleon. {self.chameleon_name} won the game!"
-                        )
-                    rewards = self.get_rewards(chameleon_win=True)
-                    terminal = True
-                else:
-                    self._moderator_speak(
-                        f"The accusation is correct! {self.chameleon_name} is the chameleon! "
-                        f"Now {self.chameleon_name} can guess the secret code. "
-                        'You should say: I guess the code is "..."'
-                    )
-                    self._current_phase = "guess"
-                    rewards = self.get_zero_rewards()
-                    terminal = False
-                self._current_turn += 1
-
-            timestep = TimeStep(
-                observation=self.get_observation(), reward=rewards, terminal=terminal
-            )
         elif self._current_phase == "guess":
+            json_list = extract_jsons(action)
+            if len(json_list) != 1:
+                raise ValueError(f"Player output {action} is not a valid json.")
+
+            guess = json_list[0].get("guess", None)
+            arguments = json_list[0].get("arguments", None)
+
             message = Message(
                 agent_name=player_name,
-                content=action,
+                content=arguments,
                 turn=self._current_turn,
-                visible_to=player_name,
             )
             self.message_pool.append_message(message)
-            if self._is_true_code(action):
+
+            if self._is_true_word(guess):
                 self._moderator_speak(
-                    f"{player_name} guessed the code correctly! The secret word is {self.code}. "
-                    f"{self.chameleon_name} won!"
+                    f"{player_name} guessed the word correctly! The secret word is {self.word}. "
+                    f"You both won!"
                 )
-                rewards = self.get_rewards(chameleon_win=True)
+                rewards = self.get_rewards(correct_guess=True)
+                is_terminal = True
             else:
                 self._moderator_speak(
-                    f"{player_name} guessed the code wrong! The secret word is {self.code}. "
-                    f"{self.non_chameleon_names} won!"
+                    f"{player_name} guessed the word wrong. Try again!"
                 )
-                rewards = self.get_rewards(chameleon_win=False)
+                rewards = self.get_rewards(correct_guess=False)
+                is_terminal = self._current_turn>=self._max_turns
+
+            self._current_phase = "give clues"
             timestep = TimeStep(
-                observation=self.get_observation(), reward=rewards, terminal=True
+                observation=self.get_observation(), reward=rewards, terminal=is_terminal
             )
         else:
             raise ValueError(f"Unknown phase: {self._current_phase}")

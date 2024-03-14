@@ -325,6 +325,13 @@ class SpyFall(Environment):
 
                     # change the game self._current_phase == "give clues"
                     self._current_phase == "give clues"
+                    self._next_player_idx = 0
+
+                    self._moderator_speak(
+                        "Host: Now it's the describing stage, players have to say something about the received word without directly saying it. "
+                        f"You cannot repeat what others has said. "
+                        "Do not say your word. " + format_specification
+                    )
 
                     if len(self.player_names) < 4:
                         rewards = self.get_rewards(spy_win=True)

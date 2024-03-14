@@ -58,10 +58,11 @@ class SpyFall(Environment):
 
     def get_next_player(self) -> str:
         """Get the next player."""
-        if self._current_phase != "guess":
-            return self.player_names[self._next_player_idx]
-        else:
-            return self.spy_name
+        # if self._current_phase != "guess":
+        #     return self.player_names[self._next_player_idx]
+        # else:
+        #     return self.spy_name
+        return self.player_names[self._next_player_idx]
 
     def reset(self):
         """Sample topic, code and spy code."""

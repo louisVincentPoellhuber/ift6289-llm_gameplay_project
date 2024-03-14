@@ -9,42 +9,9 @@ from ..message import Message, MessagePool
 from .base import Environment, TimeStep, register_env
 from ..utils import extract_jsons
 
-DEFAULT_WORD_LIST = [
-            "Apple",
-            "Banana",
-            "Orange",
-            "Grape",
-            "Strawberry",
-            "Pineapple",
-            "Mango",
-            "Watermelon",
-            "Lion",
-            "Elephant",
-            "Giraffe",
-            "Monkey",
-            "Zebra",
-            "Tiger",
-            "Bear",
-            "Kangaroo",
-            "Soccer",
-            "Basketball",
-            "Tennis",
-            "Baseball",
-            "Swimming",
-            "Cycling",
-            "Volleyball",
-            "Golf",
-            "United States",
-            "Canada",
-            "Brazil",
-            "United Kingdom",
-            "France",
-            "Germany",
-            "Japan",
-            "Australia",
-        ]
 
 
+DEFAULT_WORD_LIST = ["Ornithorhynchus"]
 speaker_format_specification = """
 Your output should be format in a json with the following schema:
 ```
@@ -128,7 +95,6 @@ class AskGuess(Environment):
         self,
         player_names: List[str],
         word_list: List[str] = None,
-        max_turns: int = 10,
         **kwargs,
     ):
         super().__init__(player_names=player_names, word_list=word_list, **kwargs)
@@ -148,8 +114,7 @@ class AskGuess(Environment):
 
         # Game states
         self._current_turn = 0
-        self._max_turns = max_turns
-        self._next_player_idx = 0
+        #self._next_player_idx = 0
         self._current_phase = "give clues"  # "give clues", "guess"
         self._initialized = False
 
@@ -165,11 +130,12 @@ class AskGuess(Environment):
     def reset(self):
         """Sample a random word and roles."""
         self.word = random.choice(self.word_list)
+
         self.guesser = random.choice(self.player_names)
         self.speaker = [name for name in self.player_names if name != self.guesser][0]
 
         self._current_turn = 0
-        self._next_player_idx = 0
+        #self._next_player_idx = 0
         self._current_phase = "give clues"
 
         self.message_pool.reset()
@@ -306,16 +272,18 @@ class AskGuess(Environment):
 
             # Update the counters
             self._current_turn += 1
-            if self._next_player_idx < len(self.player_names) - 1:
-                self._next_player_idx = 0
-                self._current_phase = "guess"
-                self._moderator_speak(
-                    "Now, using the clues given so far, try to guess the secret word. You may not guess a word you've previously guessed.",
-                    visible_to=self.guesser,
-                )
-            else:
-                self._next_player_idx += 1
+
+            #if self._next_player_idx < len(self.player_names) - 1:
+            #    self._next_player_idx = 0
+            #    self._current_phase = "guess"
+            #    self._moderator_speak(
+            #        "Now, using the clues given so far, try to guess the secret word. You may not guess a word you've previously guessed.",
+            #        visible_to=self.guesser,
+            #    )
+            #else:
+            #    self._next_player_idx += 1
                
+            self._current_phase = "guess"
 
             timestep = TimeStep(
                 observation=self.get_observation(),
@@ -337,6 +305,7 @@ class AskGuess(Environment):
             )
             self.message_pool.append_message(message)
 
+            is_terminal=False
             if self._is_true_word(guess):
                 self._moderator_speak(
                     f"{player_name} guessed the word correctly! The secret word is {self.word}. "
@@ -346,10 +315,9 @@ class AskGuess(Environment):
                 is_terminal = True
             else:
                 self._moderator_speak(
-                    f"{player_name} guessed the word wrong. Try again!"
+                    f"{player_name} guessed the word wrong. Now the speaker will give another clue! Don't forget to answer in the correct JSON format. "
                 )
                 rewards = self.get_rewards(correct_guess=False)
-                is_terminal = self._current_turn>=self._max_turns
 
             self._current_phase = "give clues"
             timestep = TimeStep(

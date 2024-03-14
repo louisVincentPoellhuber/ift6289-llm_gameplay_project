@@ -5,6 +5,10 @@ load_dotenv()
 CHATARENA_PATH = os.getenv("CHATARENA_PATH")
 sys.path.append(CHATARENA_PATH)
 
+import json
+from time import strftime
+
+
 from chatarena.agent import Player
 from chatarena.backends import CohereAIChat
 from chatarena.environments.askguess import AskGuess
@@ -30,6 +34,14 @@ toto = Player(name="Toto",
 
 from chatarena.arena import Arena
 
-env = AskGuess(player_names = ["Paya", "Toto"])
+with open(r"C:\Users\Louis\Documents\University\Masters\H24 - Deep NLP\ift6289-llm_gameplay_project\datasets\askguess.json", "r") as fp:
+    word_list = json.load(fp)["wordict"]
+
+env = AskGuess(player_names = ["Paya", "Toto"], word_list=word_list)
 arena = Arena([paya, toto], env)
-arena.launch_cli(interactive=False)
+arena.launch_cli(interactive=False, max_steps=10)
+
+# Saving history
+arena.save_history(
+    f"src/askguess/chat_history/askguess_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
+)

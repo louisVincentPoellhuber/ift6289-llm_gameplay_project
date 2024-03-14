@@ -145,7 +145,7 @@ class MessagePool:
         """
 
         # Get the messages before the current turn
-        prev_messages = [message for message in self._messages if message.turn < turn]
+        prev_messages = [message for message in self._messages if message.turn <= turn]
 
         visible_messages = []
         for message in prev_messages:

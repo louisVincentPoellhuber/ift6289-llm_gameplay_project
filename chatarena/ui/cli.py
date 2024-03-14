@@ -176,6 +176,7 @@ class ArenaCLI:
 
             step += 1
             if max_steps is not None and step >= max_steps:
+                print("\n========= Maximum number of steps reached. Better luck next time :( ==========\n")
                 break
 
         console.print("\n========= Arena Ended! ==========\n", style="bold red")

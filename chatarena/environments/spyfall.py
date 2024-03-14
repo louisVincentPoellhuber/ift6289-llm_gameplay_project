@@ -5,6 +5,7 @@ from typing import Dict, List, Union
 from ..agent import SIGNAL_END_OF_CONVERSATION
 from ..message import Message, MessagePool
 from .base import Environment, TimeStep, register_env
+from ..utils import extract_jsons
 
 DEFAULT_TOPIC_CODES = {
     "Fruits": [
@@ -20,6 +21,33 @@ DEFAULT_TOPIC_CODES = {
         "Basketball",
     ],
 }
+
+format_specification = """
+Your output should be format in a json with the following schema:
+```
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "word": {
+      "description": "your secret word",
+      "type": "string"
+    },
+    "arguments": {
+      "description": "what you are going to say to your opponent",
+      "type": "string"
+    }
+  },
+  "required": ["word", "arguments"]
+}
+```
+
+For example:
+```
+{\n  "word": "banana",\n  "arguments": "Is it a fruit that monkeys love." \n}
+
+```
+"""
 
 
 @register_env
@@ -83,16 +111,18 @@ class SpyFall(Environment):
 
         self._moderator_speak(f"Host: The game now starts.")
         self._moderator_speak(
-            f"Your word is: {self.non_spy_word}. Remember it for the next rounds.",
+            f"Your word is: {self.non_spy_word}. Remember it for the next rounds and do not say it.",
             visible_to=self.non_spy_names,
         )
         self._moderator_speak(
-            f"Your word is: {self.spy_word}. Remember it for the next rounds.",
+            f"Your word is: {self.spy_word}. Remember it for the next rounds and do not say it.",
             visible_to=self.spy_name,
         )
         self._moderator_speak(
-            "Host: Now it's the describing stage, players have to say something about the received word without directly saying it."
-            f"You cannot repeat what others has said. We will start with {self.player_names[0]}."
+            "Host: Now it's the describing stage, players have to say something about the received word without directly saying it. "
+            f"You cannot repeat what others has said. We will start with {self.player_names[0]}. "
+            "Don't forget to answer in the correct JSON format. "
+            "Do not say your word. "
         )
         self._current_turn = 1
 
@@ -204,9 +234,15 @@ class SpyFall(Environment):
 
             ## PARSE RESPONSE see askguess
             # print("Content action:", action)
+            json_list = extract_jsons(action)
+            if len(json_list) != 1:
+                raise ValueError(f"Player output {action} is not a valid json.")
+
+            word = json_list[0].get("word", None)
+            arguments = json_list[0].get("arguments", None)
 
             message = Message(
-                agent_name=player_name, content=action, turn=self._current_turn
+                agent_name=player_name, content=arguments, turn=self._current_turn
             )
             self.message_pool.append_message(message)
 
@@ -219,6 +255,7 @@ class SpyFall(Environment):
                 self._current_phase = "accuse"
                 self._moderator_speak(
                     "Host: Now the voting start, please vote for the player you think is the spy and tell the reason why you think he is the spy."
+                    "Do not say your word. " + format_specification
                 )
                 self._current_turn += 1
 
@@ -229,15 +266,21 @@ class SpyFall(Environment):
             )  # Return all the messages
 
         elif self._current_phase == "accuse":
+            json_list = extract_jsons(action)
+            if len(json_list) != 1:
+                raise ValueError(f"Player output {action} is not a valid json.")
+
+            word = json_list[0].get("word", None)
+            arguments = json_list[0].get("arguments", None)
+
             message = Message(
                 agent_name=player_name,
-                content=action,
+                content=arguments,
                 turn=self._current_turn,
-                visible_to=[player_name],
             )
 
             self.message_pool.append_message(message)
-            vote = self._text2vote(action)
+            vote = self._text2vote(arguments)
 
             if vote in self.player_names:
                 self._players_votes[vote] += 1
@@ -248,6 +291,9 @@ class SpyFall(Environment):
                 terminal = False
             else:
                 # print(self._players_votes)
+                rewards = self.get_zero_rewards()
+                terminal = False
+
                 accuse_correct, even_vote = True, False
                 max_vote_player = max(self._players_votes, key=self._players_votes.get)
                 # detach if other players has the same number of votes
@@ -264,54 +310,37 @@ class SpyFall(Environment):
                     if even_vote:
                         self._moderator_speak(
                             f"There are even votes. The accusation does not stand."
-                            f"{self.spy_name} is the spy. {self.spy_name} won the game!"
+                            # f"{self.spy_name} is the spy. {self.spy_name} won the game!"
                         )
+
                     else:
                         self._moderator_speak(
                             f"The most-voted player is {max_vote_player}. The accusation is incorrect."
-                            f"{self.spy_name} is the spy. {self.spy_name} won the game!"
+                            # f"{self.spy_name} is the spy. {self.spy_name} won the game!"
                         )
-                    rewards = self.get_rewards(spy_win=True)
-                    terminal = True
+
+                        # remove the max_vote_player
+                        print(f"Removing player {max_vote_player}")
+                        self.player_names.remove(max_vote_player)
+
+                    # change the game self._current_phase == "give clues"
+                    self._current_phase == "give clues"
+
+                    if len(self.player_names) < 4:
+                        rewards = self.get_rewards(spy_win=True)
+                        terminal = True
                 else:
                     self._moderator_speak(
                         f"The accusation is correct! {self.spy_name} is the spy! "
                         f"Now {self.spy_name} can guess the secret code. "
                         'You should say: I guess the code is "..."'
                     )
-                    self._current_phase = "guess"
-                    rewards = self.get_zero_rewards()
-                    terminal = False
+
                 self._current_turn += 1
 
             timestep = TimeStep(
                 observation=self.get_observation(), reward=rewards, terminal=terminal
             )
-        elif self._current_phase == "guess":
-            message = Message(
-                agent_name=player_name,
-                content=action,
-                turn=self._current_turn,
-                visible_to=player_name,
-            )
-            self.message_pool.append_message(message)
-            if self._is_true_code(action):
-                self._moderator_speak(
-                    f"{player_name} guessed the code correctly! "
-                    f"{self.spy_name} won!"
-                )
-                rewards = self.get_rewards(spy_win=True)
-            else:
-                self._moderator_speak(
-                    f"{player_name} guessed the code wrong! "
-                    f"{self.non_spy_names} won!"
-                )
-                rewards = self.get_rewards(spy_win=False)
-            timestep = TimeStep(
-                observation=self.get_observation(), reward=rewards, terminal=True
-            )
-        else:
-            raise ValueError(f"Unknown phase: {self._current_phase}")
 
         # Check if the player signals the end of the conversation
         if self.is_terminal():

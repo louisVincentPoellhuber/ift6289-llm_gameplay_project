@@ -1,3 +1,4 @@
+import time
 import os
 from typing import List, Union
 
@@ -67,6 +68,9 @@ class CohereAIChat(IntelligenceBackend):
 
         if verbose:
             print("chat_history:", persona_prompt)
+
+        # sleepy spleepy
+        # time.sleep(3)
 
         response = self.client.chat(
             new_message,

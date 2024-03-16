@@ -37,9 +37,9 @@ from chatarena.arena import Arena
 with open(r"C:\Users\Louis\Documents\University\Masters\H24 - Deep NLP\ift6289-llm_gameplay_project\datasets\askguess.json", "r") as fp:
     word_list = json.load(fp)["wordict"]
 
-env = AskGuess(player_names = ["Paya", "Toto"], word_list=word_list)
+env = AskGuess(player_names = ["Paya", "Toto"], word_list=["bottles"])
 arena = Arena([paya, toto], env)
-arena.launch_cli(interactive=False, max_steps=10)
+arena.launch_cli(interactive=False, max_steps=30)
 
 # Saving history
 arena.save_chat(f"src/askguess/chat_history/askguess_{strftime('%Y_%m_%d_%H_%M_%S')}.json")

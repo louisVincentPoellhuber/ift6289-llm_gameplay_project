@@ -117,6 +117,9 @@ class AskGuess(Environment):
         #self._next_player_idx = 0
         self._current_phase = "give clues"  # "give clues", "guess"
         self._initialized = False
+        self._correct_guess = False
+        self._ending_condition = None
+        self._is_terminal = False
 
         self.reset()  # To initialize the game (select a random word and roles)
 
@@ -243,6 +246,28 @@ class AskGuess(Environment):
             SIGNAL_END_OF_CONVERSATION
         ):
             return True
+    
+    def get_disposition(self) -> Dict:
+        crucial_values = {}
+        crucial_values["secret_word"] = self.word
+        crucial_values["nb_players"] = len(self.player_names)
+        crucial_values["roles"] = {"speaker":self.speaker, "guesser":self.guesser}
+
+        return crucial_values
+
+    def get_metrics(self) -> Dict:
+        metrics = {}
+
+        metrics["nb_turns"] = self._current_turn
+
+        if self._correct_guess:
+            metrics["end_condition"] = "ST" # Successful trial
+        elif self._ending_condition != None:
+            metrics["end_condition"] = self._ending_condition # Ending error, Chat error or Answer Mentioned Error
+        else:
+            metrics["end_condition"] = "RLE" # Round Limit Error (reaches the number of max steps)
+
+        return metrics
 
     def step(self, player_name: str, action: str) -> TimeStep:
         """
@@ -260,11 +285,31 @@ class AskGuess(Environment):
             player_name == self.get_next_player()
         ), f"Wrong player! It is {self.get_next_player()} turn."
         if self._current_phase == "give clues":
+
             json_list = extract_jsons(action)
-            if len(json_list) != 1:
-                raise ValueError(f"Player output {action} is not a valid json.")
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                return timestep # stop early to avoid json error
+            elif len(json_list) != 1:
+                self._ending_condition = "EE"
+                self._is_terminal = True
+                print(f"Player output {action} is not a valid json.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                return timestep # stop early to avoid json error
+
+
+
 
             clue = json_list[0].get("clue", None)
+            if self.word in clue: 
+                self._ending_condition = "AME"
+                self._is_terminal = True
+                print(f"The answer was mentioned in the clue.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+            
             message = Message(
                 agent_name=player_name, content=clue, turn=self._current_turn
             )
@@ -272,16 +317,6 @@ class AskGuess(Environment):
 
             # Update the counters
             self._current_turn += 1
-
-            #if self._next_player_idx < len(self.player_names) - 1:
-            #    self._next_player_idx = 0
-            #    self._current_phase = "guess"
-            #    self._moderator_speak(
-            #        "Now, using the clues given so far, try to guess the secret word. You may not guess a word you've previously guessed.",
-            #        visible_to=self.guesser,
-            #    )
-            #else:
-            #    self._next_player_idx += 1
                
             self._current_phase = "guess"
 
@@ -291,10 +326,22 @@ class AskGuess(Environment):
                 terminal=False,
             )  # Return all the messages
         elif self._current_phase == "guess":
+
             json_list = extract_jsons(action)
             if len(json_list) != 1:
-                raise ValueError(f"Player output {action} is not a valid json.")
+                self._ending_condition = "EE"
+                self._is_terminal = True
+                print(f"Player output {action} is not a valid json.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                return timestep
 
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                return timestep
+            
             guess = json_list[0].get("guess", None)
             arguments = json_list[0].get("arguments", None)
 
@@ -305,14 +352,14 @@ class AskGuess(Environment):
             )
             self.message_pool.append_message(message)
 
-            is_terminal=False
             if self._is_true_word(guess):
                 self._moderator_speak(
                     f"{player_name} guessed the word correctly! The secret word is {self.word}. "
                     f"You both won!"
                 )
                 rewards = self.get_rewards(correct_guess=True)
-                is_terminal = True
+                self._correct_guess = True
+                self._is_terminal = True
             else:
                 self._moderator_speak(
                     f"{player_name} guessed the word wrong. Now the speaker will give another clue! Don't forget to answer in the correct JSON format. "
@@ -320,13 +367,10 @@ class AskGuess(Environment):
                 rewards = self.get_rewards(correct_guess=False)
 
             self._current_phase = "give clues"
-            timestep = TimeStep(
-                observation=self.get_observation(), reward=rewards, terminal=is_terminal
-            )
+            timestep = TimeStep(observation=self.get_observation(), reward=rewards, terminal=self._is_terminal)
         else:
             raise ValueError(f"Unknown phase: {self._current_phase}")
-
-        # Check if the player signals the end of the conversation
+    
         if self.is_terminal():
             timestep.terminal = True
 

@@ -103,7 +103,7 @@ players = ["Nancy", "Tom", "Cindy", "Jack", "Rose", "Edward"]
 # Running experiment
 env = SpyFall(player_names=players)
 arena = Arena([player_0, player_1, player_2, player_3, player_4, player_5], env)
-arena.launch_cli(interactive=False, max_steps=20)
+arena.launch_cli(interactive=False, max_steps=40)
 
 # Saving history
 arena.save_history(

@@ -169,7 +169,7 @@ class Environment(Configurable):
         pass
 
     @abstractmethod
-    def get_crucial_values(self) -> Dict:
+    def get_disposition(self) -> Dict:
         """
         Returns the Environment's important values to be logged. 
 

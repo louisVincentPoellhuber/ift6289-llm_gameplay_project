@@ -202,7 +202,31 @@ class Arena:
             raise ValueError("Invalid file format. Please save the chat as a JSON file.")
         chat_dict = {}  
 
+        disposition = self.environment.get_disposition()
+        chat_dict["disposition"] = disposition
         
+        player_list = []
+
+        for player in self.players:
+            player_dict = {}
+            player_dict["name"] = player.name
+            player_dict["backend"] = player.backend.type_name
+
+            player_dict["role"] = [role for role in disposition["roles"] if disposition["roles"][role] == player.name][0]
+
+            #for role in disposition["roles"]:
+            #    if disposition["roles"][role] == player.name:
+            #        player_dict["role"] = role
+
+            player_dict["role_desc"] = player.role_desc
+
+            player_list.append(player_dict)
+
+        chat_dict["players"] = player_list
+
+        metrics = self.environment.get_metrics()
+
+        chat_dict["metrics"] = metrics
 
         # Messages
         messages = self.environment.get_observation()
@@ -219,7 +243,7 @@ class Arena:
             }
             message_rows.append(message_row)
         
-        chat_dict["messages"] = messages
+        chat_dict["messages"] = message_rows
 
         with open(path, "w") as f:
-            json.dump(message_rows, f, indent=4)
+            json.dump(chat_dict, f, indent=4)

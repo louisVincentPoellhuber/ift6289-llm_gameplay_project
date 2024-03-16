@@ -248,12 +248,12 @@ class AskGuess(Environment):
             return True
     
     def get_disposition(self) -> Dict:
-        crucial_values = {}
-        crucial_values["secret_word"] = self.word
-        crucial_values["nb_players"] = len(self.player_names)
-        crucial_values["roles"] = {"speaker":self.speaker, "guesser":self.guesser}
+        disposition = {}
+        disposition["secret_word"] = self.word
+        disposition["nb_players"] = len(self.player_names)
+        disposition["roles"] = {"speaker":[self.speaker], "guesser":[self.guesser]} # has to be lists!
 
-        return crucial_values
+        return disposition
 
     def get_metrics(self) -> Dict:
         metrics = {}

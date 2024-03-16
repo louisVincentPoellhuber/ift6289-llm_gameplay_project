@@ -37,7 +37,7 @@ from chatarena.arena import Arena
 with open(r"C:\Users\Louis\Documents\University\Masters\H24 - Deep NLP\ift6289-llm_gameplay_project\datasets\askguess.json", "r") as fp:
     word_list = json.load(fp)["wordict"]
 
-env = AskGuess(player_names = ["Paya", "Toto"], word_list=["bottles"])
+env = AskGuess(player_names = ["Paya", "Toto"], word_list=word_list)
 arena = Arena([paya, toto], env)
 arena.launch_cli(interactive=False, max_steps=30)
 

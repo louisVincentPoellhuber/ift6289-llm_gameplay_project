@@ -212,7 +212,7 @@ class Arena:
             player_dict["name"] = player.name
             player_dict["backend"] = player.backend.type_name
 
-            player_dict["role"] = [role for role in disposition["roles"] if disposition["roles"][role] == player.name][0]
+            player_dict["role"] = [role for role in disposition["roles"] if player.name in disposition["roles"][role]][0]
 
             #for role in disposition["roles"]:
             #    if disposition["roles"][role] == player.name:

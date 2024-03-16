@@ -106,6 +106,5 @@ arena = Arena([player_0, player_1, player_2, player_3, player_4, player_5], env)
 arena.launch_cli(interactive=False, max_steps=40)
 
 # Saving history
-arena.save_history(
-    f"src/spyfall/chat_history/spyfall_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
-)
+#arena.save_history(f"src/spyfall/chat_history/spyfall_{strftime('%Y_%m_%d_%H_%M_%S')}.json")
+arena.save_chat(f"src/spyfall/chat_history/spyfall_{strftime('%Y_%m_%d_%H_%M_%S')}.json")

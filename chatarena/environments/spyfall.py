@@ -81,6 +81,7 @@ class SpyFall(Environment):
         self._current_phase = "give clues"  # "give clues", "accuse", "guess"
         self._players_votes = None
         self._initialized = False
+        self._end_condition = None
 
         self.reset()  # To initialize the game (select topic, code, spy)
 
@@ -211,6 +212,28 @@ class SpyFall(Environment):
             SIGNAL_END_OF_CONVERSATION
         ):
             return True
+        
+    
+    def get_disposition(self) -> Dict:
+        disposition = {}
+        disposition["true_word"] = self.non_spy_word
+        disposition["spy_word"] = self.spy_word
+        disposition["nb_players"] = len(self.player_names)
+        disposition["roles"] = {"non_spy":self.non_spy_names, "spy":[self.spy_name]} # has to be lists!
+
+        return disposition
+
+    def get_metrics(self) -> Dict:
+        metrics = {}
+
+        metrics["nb_turns"] = self._current_turn
+
+        if self._ending_condition != None:
+            metrics["end_condition"] = self._ending_condition # Ending error, Chat error or Answer Mentioned Error
+        else:
+            metrics["end_condition"] = "RLE" # Round Limit Error (reaches the number of max steps)
+
+        return metrics
 
     def step(self, player_name: str, action: str) -> TimeStep:
         """
@@ -235,8 +258,18 @@ class SpyFall(Environment):
             ## PARSE RESPONSE see askguess
             # print("Content action:", action)
             json_list = extract_jsons(action)
-            if len(json_list) != 1:
-                raise ValueError(f"Player output {action} is not a valid json.")
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                return timestep # stop early to avoid json error
+            elif len(json_list) != 1:
+                self._ending_condition = "EE"
+                self._is_terminal = True
+                print(f"Player output {action} is not a valid json.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                return timestep # stop early to avoid json error
 
             word = json_list[0].get("word", None)
             arguments = json_list[0].get("arguments", None)
@@ -267,8 +300,18 @@ class SpyFall(Environment):
 
         elif self._current_phase == "accuse":
             json_list = extract_jsons(action)
-            if len(json_list) != 1:
-                raise ValueError(f"Player output {action} is not a valid json.")
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                return timestep # stop early to avoid json error
+            elif len(json_list) != 1:
+                self._ending_condition = "EE"
+                self._is_terminal = True
+                print(f"Player output {action} is not a valid json.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                return timestep # stop early to avoid json error
 
             word = json_list[0].get("word", None)
             arguments = json_list[0].get("arguments", None)
@@ -342,6 +385,7 @@ class SpyFall(Environment):
                         f"Now {self.spy_name} can guess the secret code. "
                         'You should say: I guess the code is "..."'
                     )
+                    self._end_condition = "SW"
 
                 self._current_turn += 1
 

@@ -81,6 +81,8 @@ class CohereAIChat(IntelligenceBackend):
         )
 
         self.session_id = response.conversation_id  # Update the session id
+        if "END_OF_CONVERSATION" in response.text: # Chat Error
+            return "END_OF_CONVERSATION"
         return response.text
 
     def query(

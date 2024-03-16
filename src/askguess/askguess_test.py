@@ -42,6 +42,4 @@ arena = Arena([paya, toto], env)
 arena.launch_cli(interactive=False, max_steps=10)
 
 # Saving history
-arena.save_history(
-    f"src/askguess/chat_history/askguess_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
-)
+arena.save_chat(f"src/askguess/chat_history/askguess_{strftime('%Y_%m_%d_%H_%M_%S')}.json")

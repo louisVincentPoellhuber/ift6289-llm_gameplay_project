@@ -168,6 +168,32 @@ class Environment(Configurable):
         """
         pass
 
+    @abstractmethod
+    def get_crucial_values(self) -> Dict:
+        """
+        Returns the Environment's important values to be logged. 
+
+        Note:
+            This method must be implemented by subclasses.
+
+        Returns:
+            Dict: Dictionnary of the important variables and their values. 
+        """
+        pass
+
+    @abstractmethod
+    def get_metrics(self) -> Dict:
+        """
+        Returns the Environment's metrics to be logged. 
+
+        Note:
+            This method must be implemented by subclasses.
+
+        Returns:
+            Dict: Dictionnary of the metrics and their values. 
+        """
+        pass
+
     def get_zero_rewards(self) -> Dict[str, float]:
         """
         Return a dictionary with all player names as keys and zero as reward.

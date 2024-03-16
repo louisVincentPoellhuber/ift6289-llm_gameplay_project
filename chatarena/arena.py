@@ -196,3 +196,30 @@ class Arena:
                 json.dump(message_rows, f, indent=4)
         else:
             raise ValueError("Invalid file format")
+        
+    def save_chat(self, path: str):
+        if not path.endswith(".json"):
+            raise ValueError("Invalid file format. Please save the chat as a JSON file.")
+        chat_dict = {}  
+
+        
+
+        # Messages
+        messages = self.environment.get_observation()
+        message_rows = []
+
+        for message in messages:
+            message_row = {
+                "agent_name": message.agent_name,
+                "content": message.content,
+                "turn": message.turn,
+                "timestamp": str(message.timestamp),
+                "visible_to": message.visible_to,
+                "msg_type": message.msg_type,
+            }
+            message_rows.append(message_row)
+        
+        chat_dict["messages"] = messages
+
+        with open(path, "w") as f:
+            json.dump(message_rows, f, indent=4)

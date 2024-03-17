@@ -212,14 +212,16 @@ class SpyFall(Environment):
             SIGNAL_END_OF_CONVERSATION
         ):
             return True
-        
-    
+
     def get_disposition(self) -> Dict:
         disposition = {}
         disposition["true_word"] = self.non_spy_word
         disposition["spy_word"] = self.spy_word
         disposition["nb_players"] = len(self.player_names)
-        disposition["roles"] = {"non_spy":self.non_spy_names, "spy":[self.spy_name]} # has to be lists!
+        disposition["roles"] = {
+            "non_spy": self.non_spy_names,
+            "spy": [self.spy_name],
+        }  # has to be lists!
 
         return disposition
 
@@ -229,9 +231,13 @@ class SpyFall(Environment):
         metrics["nb_turns"] = self._current_turn
 
         if self._ending_condition != None:
-            metrics["end_condition"] = self._ending_condition # Ending error, Chat error or Answer Mentioned Error
+            metrics["end_condition"] = (
+                self._ending_condition
+            )  # Ending error, Chat error or Answer Mentioned Error
         else:
-            metrics["end_condition"] = "RLE" # Round Limit Error (reaches the number of max steps)
+            metrics["end_condition"] = (
+                "RLE"  # Round Limit Error (reaches the number of max steps)
+            )
 
         return metrics
 
@@ -262,14 +268,22 @@ class SpyFall(Environment):
                 self._ending_condition = "CE"
                 self._is_terminal = True
                 print(f"There was a chat error.")
-                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
-                return timestep # stop early to avoid json error
+                timestep = TimeStep(
+                    observation=self.get_observation(),
+                    reward=self.get_zero_rewards(),
+                    terminal=self._is_terminal,
+                )
+                return timestep  # stop early to avoid json error
             elif len(json_list) != 1:
                 self._ending_condition = "EE"
                 self._is_terminal = True
                 print(f"Player output {action} is not a valid json.")
-                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
-                return timestep # stop early to avoid json error
+                timestep = TimeStep(
+                    observation=self.get_observation(),
+                    reward=self.get_zero_rewards(),
+                    terminal=self._is_terminal,
+                )
+                return timestep  # stop early to avoid json error
 
             word = json_list[0].get("word", None)
             arguments = json_list[0].get("arguments", None)
@@ -288,7 +302,8 @@ class SpyFall(Environment):
                 self._current_phase = "accuse"
                 self._moderator_speak(
                     "Host: Now the voting start, please vote for the player you think is the spy and tell the reason why you think he is the spy."
-                    "Do not say your word. " + format_specification
+                    "Do not say your word. Remember the JSON format."
+                    + format_specification
                 )
                 self._current_turn += 1
 
@@ -304,14 +319,22 @@ class SpyFall(Environment):
                 self._ending_condition = "CE"
                 self._is_terminal = True
                 print(f"There was a chat error.")
-                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
-                return timestep # stop early to avoid json error
+                timestep = TimeStep(
+                    observation=self.get_observation(),
+                    reward=self.get_zero_rewards(),
+                    terminal=self._is_terminal,
+                )
+                return timestep  # stop early to avoid json error
             elif len(json_list) != 1:
                 self._ending_condition = "EE"
                 self._is_terminal = True
                 print(f"Player output {action} is not a valid json.")
-                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
-                return timestep # stop early to avoid json error
+                timestep = TimeStep(
+                    observation=self.get_observation(),
+                    reward=self.get_zero_rewards(),
+                    terminal=self._is_terminal,
+                )
+                return timestep  # stop early to avoid json error
 
             word = json_list[0].get("word", None)
             arguments = json_list[0].get("arguments", None)

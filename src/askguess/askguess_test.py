@@ -10,12 +10,16 @@ from time import strftime
 
 
 from chatarena.agent import Player
-from chatarena.backends import CohereAIChat
+from chatarena.backends import CohereAIChat, OpenAIChat, Claude
 from chatarena.environments.askguess import AskGuess
 
 import cohere
+import openai
+import anthropic
 
-client = cohere.Client(api_key=os.environ.get("COHEREAI_API_KEY"))
+#client = cohere.Client(api_key=os.environ.get("COHEREAI_API_KEY"))
+#client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 role_description = """
 You are going to play in a two-player word guessing game. There are two roles in the game:
@@ -26,11 +30,11 @@ the word correctly in as few rounds as possible.
 
 paya = Player(name="Paya",
                 role_desc=role_description,
-                backend=CohereAIChat())
+                backend=Claude())
 
 toto = Player(name="Toto",
                 role_desc=role_description,
-                backend=CohereAIChat())
+                backend=Claude())
 
 from chatarena.arena import Arena
 

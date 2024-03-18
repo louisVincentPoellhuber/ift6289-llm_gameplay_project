@@ -13,7 +13,7 @@ from ..utils import extract_jsons
 
 DEFAULT_WORD_LIST = ["Ornithorhynchus"]
 speaker_format_specification = """
-Your output should be format in a json with the following schema:
+Your output should be formatted in a json with the following schema:
 ```
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
@@ -60,7 +60,7 @@ You should never:
 
 
 guesser_format_specification = """
-Your output should be format in a json with the following schema:
+Your output should be formatted in a json with the following schema:
 ```
 {
   "$schema": "http://json-schema.org/draft-07/schema#",

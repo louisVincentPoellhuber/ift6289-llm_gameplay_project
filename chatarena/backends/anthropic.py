@@ -23,6 +23,7 @@ else:
 
 DEFAULT_MAX_TOKENS = 256
 DEFAULT_MODEL = "claude-v1"
+DEFAULT_TEMPERATURE = 0.0
 
 
 @register_backend
@@ -33,7 +34,8 @@ class Claude(IntelligenceBackend):
     type_name = "claude"
 
     def __init__(
-        self, max_tokens: int = DEFAULT_MAX_TOKENS, model: str = DEFAULT_MODEL, **kwargs
+        self, max_tokens: int = DEFAULT_MAX_TOKENS, model: str = DEFAULT_MODEL, 
+        temperature: float = DEFAULT_TEMPERATURE, **kwargs
     ):
         assert (
             is_anthropic_available
@@ -42,19 +44,21 @@ class Claude(IntelligenceBackend):
 
         self.max_tokens = max_tokens
         self.model = model
-
-        self.client = anthropic.Client(os.environ["ANTHROPIC_API_KEY"])
+        self.client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+        self.role_desc = None
 
     @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, prompt: str):
-        response = self.client.completion(
-            prompt=prompt,
-            stop_sequences=[anthropic.HUMAN_PROMPT],
+        response = self.client.messages.create(
             model=self.model,
-            max_tokens_to_sample=self.max_tokens,
+            max_tokens=self.max_tokens,
+            temperature=self.tempearture,
+            system="You are a player in a game. Your role is:",
+            messages=prompt
         )
 
-        response = response["completion"].strip()
+
+        response = response.content
         return response
 
     def query(
@@ -77,6 +81,9 @@ class Claude(IntelligenceBackend):
             history_messages: the history of the conversation, or the observation for the agent
             request_msg: the request from the system to guide the agent's next response
         """
+        if self.role_desc == None:
+            self.role_desc = role_desc
+
         all_messages = (
             [(SYSTEM, global_prompt), (SYSTEM, role_desc)]
             if global_prompt
@@ -112,7 +119,7 @@ class Claude(IntelligenceBackend):
         # Add the AI prompt for Claude to generate the response
         prompt = f"{prompt}{anthropic.AI_PROMPT}"
 
-        response = self._get_response(prompt, *args, **kwargs)
+        response = self._get_response(prompt)
 
         # Remove the agent name if the response starts with it
         response = re.sub(rf"^\s*\[{agent_name}]:?", "", response).strip()

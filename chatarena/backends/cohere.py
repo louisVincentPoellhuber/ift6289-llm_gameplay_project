@@ -70,8 +70,7 @@ class CohereAIChat(IntelligenceBackend):
             print("chat_history:", persona_prompt)
 
         # sleepy spleepy
-        # time.sleep(3)
-
+        time.sleep(3)
         response = self.client.chat(
             new_message,
             chat_history=persona_prompt,
@@ -81,7 +80,7 @@ class CohereAIChat(IntelligenceBackend):
         )
 
         self.session_id = response.conversation_id  # Update the session id
-        if "END_OF_CONVERSATION" in response.text: # Chat Error
+        if "END_OF_CONVERSATION" in response.text:  # Chat Error
             return "END_OF_CONVERSATION"
         return response.text
 

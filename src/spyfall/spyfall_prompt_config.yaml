@@ -1,0 +1,228 @@
+role_description: |
+  Now you are playing the game called "who is the spy".
+
+  There are {number_of_players} players in this game. 
+  At the beginning of the game, everyone will receive a word.
+  There is one spy who will receive a spy word, while others will receive a common word.
+  Spy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".
+
+  There are two stages in each round of the game.
+
+  The first stage is describing stage:
+  Everyone needs to use a word or a few words to say something in turn about the word he received without directly saying the word.
+  The funniest part of the game is that since you do not know other's words, you are not sure whether you are the spy.
+  So, you can only infer who have the different based on other players description.
+
+  The second stage is the voting stage:
+  After everyone speaks, each player must vote for a player who he thinks is the spy and tell others why. 
+  Players can not repeat other players' speeches or their own speeches in the previous round. 
+  The player getting the most votes will be eliminated from the game.
+
+  If the spy is eliminated, the rest of the players win.
+  If there are less than three players, and the spy still lives, then the spy wins.
+
+json_format_specification: |
+  {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "word": {
+        "description": "your secret word",
+        "type": "string"
+      },
+      "arguments": {
+        "description": "what you are going to say to your opponent",
+        "type": "string"
+      }
+    },
+    "required": ["word", "arguments"]
+  }
+
+
+## Prompt designs --------------------------------------
+## Each prompt must follow this template:
+
+## name_of_the_prompt:
+##   moderator_gives_word: ...{word}...
+##   describing_phase: ...{player}...
+##   voting_phase:
+##   moderator_says_even_votes:
+##   moderator_says_wrong_guess: ...{player_votes}...{most_voted_player}
+##   moderator_says_spy_wins: 
+##   moderator_says_villagers_win: ...{spy_name}...
+
+
+baseline:
+  moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
+  describing_phase: >
+    ========= Describing phase =========
+    Host: Now it's the describing stage, players have to say something about the received
+    word without directly saying it.
+    You cannot repeat what others has said. We will start with {player}.
+  voting_phase: >
+    ========= Voting phase =========
+    Host: Now the voting start, please vote for the player you think is the spy and tell the 
+    reason why you think he is the spy.
+  moderator_says_even_votes: There are even votes. The accusation does not stand.
+  moderator_says_wrong_guess: |
+    Votes: {player_votes}.
+    The most-voted player is {most_voted_player}. The accusation is incorrect.
+    Removing player: {most_voted_player}.
+  moderator_says_spy_wins: Less than 4 players now! Spy wins.
+  moderator_says_villagers_win: The accusation is correct! {spy_name} is the spy!
+  
+
+
+remember_json:
+  moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
+  describing_phase: |
+    ========= Describing phase ========= 
+    Host: Now it's the describing stage, players have to say something about the received
+    word without directly saying it.
+    You cannot repeat what others has said. We will start with {player}.
+    Don't forget to answer in the correct JSON format for your answer:
+    {{
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {{
+        "word": {{
+          "description": "your secret word",
+          "type": "string"
+        }},
+        "arguments": {{
+          "description": "what you are going to say to your opponent",
+          "type": "string"
+        }}
+      }},
+      "required": ["word", "arguments"]
+    }}
+  voting_phase: |
+    ========= Voting stage =========
+    Host: Now the voting start, please vote for the player you think is the spy and tell the reason why you think he is the spy. 
+    Do not say your word. Remember the JSON format for your answer:
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "word": {
+          "description": "your secret word",
+          "type": "string"
+        },
+        "arguments": {
+          "description": "what you are going to say to your opponent",
+          "type": "string"
+        }
+      },
+      "required": ["word", "arguments"]
+    }
+  moderator_says_even_votes: There are even votes. The accusation does not stand.
+  moderator_says_wrong_guess: |
+    Votes: {player_votes}.
+    The most-voted player is {most_voted_player}. The accusation is incorrect.
+    Removing player: {most_voted_player}.
+  moderator_says_spy_wins: Less than 4 players now! Spy wins.
+  moderator_says_villagers_win: The accusation is correct! {spy_name} is the spy!
+
+
+
+remember_json_and_not_to_say_word:
+  moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
+  describing_phase: |
+    ========= Describing phase ========= 
+    Host: Now it's the describing stage, players have to say something about the received word without directly saying it.
+    You cannot repeat what others has said. We will start with {player}.
+    Don't forget to answer in the correct JSON format for your answer:
+    {{
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {{
+        "word": {{
+          "description": "your secret word",
+          "type": "string"
+        }},
+        "arguments": {{
+          "description": "what you are going to say to your opponent",
+          "type": "string"
+        }}
+      }},
+      "required": ["word", "arguments"]
+    }}s
+    Do not say your word.
+  voting_phase: |
+    ========= Voting stage =========
+    Host: Now the voting start, please vote for the player you think is the spy and tell the reason why you think he is the spy.
+    Do not say your word. Remember the JSON format for your answer:
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "word": {
+          "description": "your secret word",
+          "type": "string"
+        },
+        "arguments": {
+          "description": "what you are going to say to your opponent",
+          "type": "string"
+        }
+      },
+      "required": ["word", "arguments"]
+    }
+  moderator_says_even_votes: There are even votes. The accusation does not stand.
+  moderator_says_wrong_guess: |
+    Votes: {player_votes}.
+    The most-voted player is {most_voted_player}. The accusation is incorrect.
+    Removing player: {most_voted_player}.
+  moderator_says_spy_wins: Less than 4 players now! Spy wins.
+  moderator_says_villagers_win: The accusation is correct! {spy_name} is the spy!
+
+
+
+remember_json_not_to_interact:
+  moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
+  describing_phase: |
+    ========= Describing phase =========
+    Host: Now it's the describing stage, players have to say something about the received word without directly saying it.
+    You cannot repeat what others has said. We will start with {player}.
+    Don't forget to answer in the correct JSON format for your answer:
+    {{
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {{
+        "word": {{
+          "description": "your secret word",
+          "type": "string"
+        }},
+        "arguments": {{
+          "description": "what you are going to say to your opponent",
+          "type": "string"
+        }}
+      }},
+      "required": ["word", "arguments"]
+    }}
+    Do not say your word and do not interact with the other players yet.
+  voting_phase: |
+    ========= Voting phase =========
+    Host: Now the voting start, please vote for the player you think is the spy and tell the reason why you think he is the spy.
+    Do not say your word. Remember the JSON format for your answer:
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "word": {
+          "description": "your secret word",
+          "type": "string"
+        },
+        "arguments": {
+          "description": "what you are going to say to your opponent",
+          "type": "string"
+        }
+      },
+      "required": ["word", "arguments"]
+    }
+  moderator_says_even_votes: There are even votes. The accusation does not stand.
+  moderator_says_wrong_guess: |
+    Votes: {player_votes}.
+    The most-voted player is {most_voted_player}. The accusation is incorrect.
+    Removing player: {most_voted_player}.
+  moderator_says_spy_wins: Less than 4 players now! Spy wins.
+  moderator_says_villagers_win: The accusation is correct! {spy_name} is the spy!

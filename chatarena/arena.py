@@ -56,7 +56,9 @@ class Arena:
         )  # get the observation for the player
 
         timestep = None
-        for i in range(self.invalid_actions_retry):  # try to take an action for a few times
+        for i in range(
+            self.invalid_actions_retry
+        ):  # try to take an action for a few times
             action = player(observation)  # take an action
             if self.environment.check_action(action, player_name):  # action is valid
                 timestep = self.environment.step(
@@ -115,9 +117,9 @@ class Arena:
         ), "Player names must be unique"
 
         # Create the environment
-        config.environment[
-            "player_names"
-        ] = player_names  # add the player names to the environment config
+        config.environment["player_names"] = (
+            player_names  # add the player names to the environment config
+        )
         env = load_environment(config.environment)
 
         return cls(players, env, global_prompt=global_prompt)
@@ -196,15 +198,17 @@ class Arena:
                 json.dump(message_rows, f, indent=4)
         else:
             raise ValueError("Invalid file format")
-        
+
     def save_chat(self, path: str):
         if not path.endswith(".json"):
-            raise ValueError("Invalid file format. Please save the chat as a JSON file.")
-        chat_dict = {}  
+            raise ValueError(
+                "Invalid file format. Please save the chat as a JSON file."
+            )
+        chat_dict = {}
 
         disposition = self.environment.get_disposition()
         chat_dict["disposition"] = disposition
-        
+
         player_list = []
 
         for player in self.players:
@@ -212,9 +216,13 @@ class Arena:
             player_dict["name"] = player.name
             player_dict["backend"] = player.backend.type_name
 
-            player_dict["role"] = [role for role in disposition["roles"] if player.name in disposition["roles"][role]][0]
+            player_dict["role"] = [
+                role
+                for role in disposition["roles"]
+                if player.name in disposition["roles"][role]
+            ][0]
 
-            #for role in disposition["roles"]:
+            # for role in disposition["roles"]:
             #    if disposition["roles"][role] == player.name:
             #        player_dict["role"] = role
 
@@ -235,6 +243,7 @@ class Arena:
         for message in messages:
             message_row = {
                 "agent_name": message.agent_name,
+                "word": message.word,
                 "content": message.content,
                 "turn": message.turn,
                 "timestamp": str(message.timestamp),
@@ -242,7 +251,7 @@ class Arena:
                 "msg_type": message.msg_type,
             }
             message_rows.append(message_row)
-        
+
         chat_dict["messages"] = message_rows
 
         with open(path, "w") as f:

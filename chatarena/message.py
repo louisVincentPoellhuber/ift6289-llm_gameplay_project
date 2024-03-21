@@ -43,7 +43,8 @@ class Message:
     agent_name: str
     content: str
     turn: int
-    #role: str = "CHATBOT"
+    word: str = None
+    # role: str = "CHATBOT"
     timestamp: int = time.time_ns()
     visible_to: Union[str, List[str]] = "all"
     msg_type: str = "text"

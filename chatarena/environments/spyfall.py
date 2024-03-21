@@ -1,3 +1,4 @@
+import yaml
 import random
 import re
 from typing import Dict, List, Union
@@ -6,6 +7,7 @@ from ..agent import SIGNAL_END_OF_CONVERSATION
 from ..message import Message, MessagePool
 from .base import Environment, TimeStep, register_env
 from ..utils import extract_jsons
+
 
 DEFAULT_TOPIC_CODES = {
     "Fruits": [
@@ -22,33 +24,6 @@ DEFAULT_TOPIC_CODES = {
     ],
 }
 
-format_specification = """
-Your output should be format in a json with the following schema:
-```
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "properties": {
-    "word": {
-      "description": "your secret word",
-      "type": "string"
-    },
-    "arguments": {
-      "description": "what you are going to say to your opponent",
-      "type": "string"
-    }
-  },
-  "required": ["word", "arguments"]
-}
-```
-
-For example:
-```
-{\n  "word": "banana",\n  "arguments": "Is it a fruit that monkeys love." \n}
-
-```
-"""
-
 
 @register_env
 class SpyFall(Environment):
@@ -56,6 +31,8 @@ class SpyFall(Environment):
 
     def __init__(
         self,
+        prompt_config_mode: str,
+        prompt_config_file: str,
         player_names: List[str],
         topic_codes: Dict[str, List[str]] = None,
         **kwargs,
@@ -82,15 +59,17 @@ class SpyFall(Environment):
         self._players_votes = None
         self._initialized = False
         self._end_condition = None
+        self._prompt_config_mode = prompt_config_mode
+        self._prompt_config_prompt_config_file = prompt_config_file
+
+        # Reading prompt configs
+        with open(self._prompt_config_prompt_config_file, "r") as file:
+            self._prompts = yaml.safe_load(file)
 
         self.reset()  # To initialize the game (select topic, code, spy)
 
     def get_next_player(self) -> str:
         """Get the next player."""
-        # if self._current_phase != "guess":
-        #     return self.player_names[self._next_player_idx]
-        # else:
-        #     return self.spy_name
         return self.player_names[self._next_player_idx]
 
     def reset(self):
@@ -111,22 +90,30 @@ class SpyFall(Environment):
         self.message_pool.reset()
 
         self._moderator_speak(f"Host: The game now starts.")
+        # Moderator gives word to villagers
         self._moderator_speak(
-            f"Your word is: {self.non_spy_word}. Remember it for the next rounds and do not say it.",
+            self._prompts[self._prompt_config_mode]["moderator_gives_word"]
+            .format(word=self.non_spy_word)
+            .replace(r"{{", "{")
+            .replace(r"}}", "}"),
             visible_to=self.non_spy_names,
         )
+        # Moderator gives word to spy
         self._moderator_speak(
-            f"Your word is: {self.spy_word}. Remember it for the next rounds and do not say it.",
+            self._prompts[self._prompt_config_mode]["moderator_gives_word"]
+            .format(word=self.spy_word)
+            .replace(r"{{", "{")
+            .replace(r"}}", "}"),
             visible_to=self.spy_name,
         )
+        # Moderator says it's describing phase
         self._moderator_speak(
-            "Host: Now it's the describing stage, players have to say something about the received word without directly saying it. "
-            f"You cannot repeat what others has said. We will start with {self.player_names[0]}. "
-            "Don't forget to answer in the correct JSON format. "
-            "Do not say your word. "
+            self._prompts[self._prompt_config_mode]["describing_phase"]
+            .format(player=self.player_names[0])
+            .replace(r"{{", "{")
+            .replace(r"}}", "}")
         )
         self._current_turn = 1
-
         self._players_votes = {name: 0 for name in self.player_names}
 
         self._initialized = True
@@ -222,7 +209,7 @@ class SpyFall(Environment):
             "non_spy": self.non_spy_names,
             "spy": [self.spy_name],
         }  # has to be lists!
-
+        disposition["prompt_version"] = self._prompt_config_mode
         return disposition
 
     def get_metrics(self) -> Dict:
@@ -230,9 +217,9 @@ class SpyFall(Environment):
 
         metrics["nb_turns"] = self._current_turn
 
-        if self._ending_condition != None:
+        if self._end_condition != None:
             metrics["end_condition"] = (
-                self._ending_condition
+                self._end_condition
             )  # Ending error, Chat error or Answer Mentioned Error
         else:
             metrics["end_condition"] = (
@@ -254,7 +241,7 @@ class SpyFall(Environment):
             self.reset()
 
         # self.message_pool.print()
-        # print(f"spy: {self.spy_name}, Code: {self.code}, Topic: {self.topic}")
+        # print(f"spy: {self.spy_name}")
         assert (
             player_name == self.get_next_player()
         ), f"Wrong player! It is {self.get_next_player()} turn."
@@ -265,9 +252,10 @@ class SpyFall(Environment):
             # print("Content action:", action)
             json_list = extract_jsons(action)
             if "END_OF_CONVERSATION" in action:
-                self._ending_condition = "CE"
+                self._end_condition = "CE"
                 self._is_terminal = True
                 print(f"There was a chat error.")
+                print(action)
                 timestep = TimeStep(
                     observation=self.get_observation(),
                     reward=self.get_zero_rewards(),
@@ -275,58 +263,7 @@ class SpyFall(Environment):
                 )
                 return timestep  # stop early to avoid json error
             elif len(json_list) != 1:
-                self._ending_condition = "EE"
-                self._is_terminal = True
-                print(f"Player output {action} is not a valid json.")
-                timestep = TimeStep(
-                    observation=self.get_observation(),
-                    reward=self.get_zero_rewards(),
-                    terminal=self._is_terminal,
-                )
-                return timestep  # stop early to avoid json error
-
-            word = json_list[0].get("word", None)
-            arguments = json_list[0].get("arguments", None)
-
-            message = Message(
-                agent_name=player_name, content=arguments, turn=self._current_turn
-            )
-            self.message_pool.append_message(message)
-
-            # Update the counters
-            self._current_turn += 1
-            if self._next_player_idx < len(self.player_names) - 1:
-                self._next_player_idx += 1
-            else:
-                self._next_player_idx = 0
-                self._current_phase = "accuse"
-                self._moderator_speak(
-                    "Host: Now the voting start, please vote for the player you think is the spy and tell the reason why you think he is the spy."
-                    "Do not say your word. Remember the JSON format."
-                    + format_specification
-                )
-                self._current_turn += 1
-
-            timestep = TimeStep(
-                observation=self.get_observation(),
-                reward=self.get_zero_rewards(),
-                terminal=False,
-            )  # Return all the messages
-
-        elif self._current_phase == "accuse":
-            json_list = extract_jsons(action)
-            if "END_OF_CONVERSATION" in action:
-                self._ending_condition = "CE"
-                self._is_terminal = True
-                print(f"There was a chat error.")
-                timestep = TimeStep(
-                    observation=self.get_observation(),
-                    reward=self.get_zero_rewards(),
-                    terminal=self._is_terminal,
-                )
-                return timestep  # stop early to avoid json error
-            elif len(json_list) != 1:
-                self._ending_condition = "EE"
+                self._end_condition = "EE"
                 self._is_terminal = True
                 print(f"Player output {action} is not a valid json.")
                 timestep = TimeStep(
@@ -342,6 +279,61 @@ class SpyFall(Environment):
             message = Message(
                 agent_name=player_name,
                 content=arguments,
+                word=word,
+                turn=self._current_turn,
+            )
+            self.message_pool.append_message(message)
+
+            # Update the counters
+            self._current_turn += 1
+            if self._next_player_idx < len(self.player_names) - 1:
+                self._next_player_idx += 1
+            else:
+                self._next_player_idx = 0
+                self._current_phase = "accuse"
+                self._moderator_speak(
+                    self._prompts[self._prompt_config_mode]["voting_phase"]
+                )
+                self._current_turn += 1
+
+            timestep = TimeStep(
+                observation=self.get_observation(),
+                reward=self.get_zero_rewards(),
+                terminal=False,
+            )  # Return all the messages
+
+        elif self._current_phase == "accuse":
+            json_list = extract_jsons(action)
+            # print("Accuse action:", action)
+            if "END_OF_CONVERSATION" in action:
+                self._end_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(
+                    observation=self.get_observation(),
+                    reward=self.get_zero_rewards(),
+                    terminal=self._is_terminal,
+                )
+                return timestep  # stop early to avoid json error
+            elif len(json_list) != 1:
+                self._end_condition = "EE"
+                self._is_terminal = True
+
+                print(f"Player output {action} is not a valid json.")
+                timestep = TimeStep(
+                    observation=self.get_observation(),
+                    reward=self.get_zero_rewards(),
+                    terminal=self._is_terminal,
+                )
+                return timestep  # stop early to avoid json error
+
+            word = json_list[0].get("word", None)
+            arguments = json_list[0].get("arguments", None)
+
+            message = Message(
+                agent_name=player_name,
+                content=arguments,
+                word=word,
                 turn=self._current_turn,
             )
 
@@ -356,7 +348,7 @@ class SpyFall(Environment):
                 rewards = self.get_zero_rewards()
                 terminal = False
             else:
-                # print(self._players_votes)
+
                 rewards = self.get_zero_rewards()
                 terminal = False
 
@@ -375,40 +367,57 @@ class SpyFall(Environment):
                 if not accuse_correct:
                     if even_vote:
                         self._moderator_speak(
-                            f"There are even votes. The accusation does not stand."
-                            # f"{self.spy_name} is the spy. {self.spy_name} won the game!"
+                            # Even player votes
+                            self._prompts[self._prompt_config_mode][
+                                "moderator_says_even_votes"
+                            ]
                         )
 
                     else:
+                        # Players vote for the wrong spy
                         self._moderator_speak(
-                            f"The most-voted player is {max_vote_player}. The accusation is incorrect."
-                            # f"{self.spy_name} is the spy. {self.spy_name} won the game!"
+                            self._prompts[self._prompt_config_mode][
+                                "moderator_says_wrong_guess"
+                            ].format(
+                                player_votes=self._players_votes,
+                                most_voted_player=max_vote_player,
+                            )
                         )
-
                         # remove the max_vote_player
-                        print(f"Removing player {max_vote_player}")
+                        # print(f"Removing player {max_vote_player}")
                         self.player_names.remove(max_vote_player)
 
-                    # change the game self._current_phase == "give clues"
-                    self._current_phase == "give clues"
+                    # change the game self._current_phase = "give clues"
+                    self._current_phase = "give clues"
+
                     self._next_player_idx = 0
 
+                    ## Moderator says that it's describing phase again
                     self._moderator_speak(
-                        "Host: Now it's the describing stage, players have to say something about the received word without directly saying it. "
-                        f"You cannot repeat what others has said. "
-                        "Do not say your word. " + format_specification
+                        self._prompts[self._prompt_config_mode]["describing_phase"]
+                        .format(player=self.player_names[0])
+                        .replace(r"{{", "{")
+                        .replace(r"}}", "}")
                     )
 
                     if len(self.player_names) < 4:
+                        # Moderator says that spy wins
+                        self._moderator_speak(
+                            self._prompts[self._prompt_config_mode][
+                                "moderator_says_spy_wins"
+                            ]
+                        )
                         rewards = self.get_rewards(spy_win=True)
+                        self._end_condition = "SPYWINS"  # spy wins
                         terminal = True
                 else:
+                    self._end_condition = "SPYLOOSES"  # SW
                     self._moderator_speak(
-                        f"The accusation is correct! {self.spy_name} is the spy! "
-                        f"Now {self.spy_name} can guess the secret code. "
-                        'You should say: I guess the code is "..."'
+                        self._prompts[self._prompt_config_mode][
+                            "moderator_says_villagers_win"
+                        ].format(spy_name=self.spy_name)
                     )
-                    self._end_condition = "SW"
+                    terminal = True
 
                 self._current_turn += 1
 

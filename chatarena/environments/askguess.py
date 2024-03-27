@@ -3,6 +3,7 @@ import string
 from unidecode import unidecode
 import re
 from typing import Dict, List, Union
+import yaml
 
 from ..agent import SIGNAL_END_OF_CONVERSATION
 from ..message import Message, MessagePool
@@ -10,82 +11,8 @@ from .base import Environment, TimeStep, register_env
 from ..utils import extract_jsons
 
 
-
+# Super hard word
 DEFAULT_WORD_LIST = ["Ornithorhynchus"]
-speaker_format_specification = """
-Your output should be formatted in a json with the following schema:
-```
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "properties": {
-    "clue": {
-      "description": "a clue hinting at the secret word that you are going to give the guesser",
-      "type": "string"
-    }
-  },
-  "required": ["clue"]
-}
-```
-
-For example:
-```
-{\n  "clue": "The secret word is a hairy animal." \n}
-
-```
-"""
-speaker_role_description = """
-You are the speaker! You will be given a secret word. You you must make your game partner 
-guess your secret word correctly, without saying the word. You will need to give them precise and 
-concise clues hinting at your secret word, excluding the secret word. 
-
-You need to make your partner guess your secret word in as few rounds as possible.
-
-You should never:
-1. Say the secret word
-2. Repeat a clue
-
-"""
-
-guesser_role_description = """
-You are the guesser! You are going to guess a secret word using clues given to you by your game partner. 
-You need to use these clues to guess the secret word. You also need to provide 
-arguments for each of your guesses, to help your partner create better clues. 
-
-You need to make your partner guess your secret word in as few rounds as possible.
-
-You should never:
-1. Repeat a guess
-"""
-
-
-guesser_format_specification = """
-Your output should be formatted in a json with the following schema:
-```
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "properties": {
-    "guess": {
-      "description": "a single word, your guess given the clues",
-      "type": "string"
-    }, 
-    "arguments": {
-      "description": "the reasoning behind your guess, why you chose this word",
-      "type": "string"
-    }
-  },
-  "required": ["guess", "arguments"]
-}
-```
-
-For example:
-```
-{\n  "guess": "cat", "arguments": "Since the clue is that the secret word is a hairy animal, my guess is 'cat'." \n}
-
-```
-"""
-
 
 @register_env
 class AskGuess(Environment):
@@ -93,6 +20,8 @@ class AskGuess(Environment):
 
     def __init__(
         self,
+        prompt_config_mode: str,
+        prompt_config_file: str,
         player_names: List[str],
         word_list: List[str] = None,
         **kwargs,
@@ -121,6 +50,14 @@ class AskGuess(Environment):
         self._ending_condition = None
         self._is_terminal = False
 
+        self._prompt_config_mode = prompt_config_mode
+        self._prompt_config_prompt_config_file = prompt_config_file
+
+        # Reading prompt configs
+        with open(self._prompt_config_prompt_config_file, "r") as file:
+            self._prompts = yaml.safe_load(file)
+
+
         self.reset()  # To initialize the game (select a random word and roles)
 
     def get_next_player(self) -> str:
@@ -143,15 +80,24 @@ class AskGuess(Environment):
 
         self.message_pool.reset()
 
-        self._moderator_speak(f"Now the game starts!")
-        self._moderator_speak(speaker_role_description + speaker_format_specification +
-            f"The secret word is: {self.word}",
+        self._moderator_speak(
+            self._prompts[self._prompt_config_mode]["speaker_role"],
             visible_to=self.speaker,
         )
-        self._moderator_speak(guesser_role_description+guesser_format_specification, visible_to=self.guesser)
         self._moderator_speak(
-            "Now the speaker now gives one clue (but don't give away the secret word). "
-            f"You cannot repeat a clue you've already given."
+            self._prompts[self._prompt_config_mode]["guesser_role"],
+            visible_to=self.guesser,
+        )
+        self._moderator_speak(f"Now the game starts!")
+        self._moderator_speak(
+            self._prompts[self._prompt_config_mode]["secret_word_message"]
+            .format(word=self.word)
+            .replace(r"{{", "{")
+            .replace(r"}}", "}"),
+            visible_to=self.speaker,
+        )
+        self._moderator_speak(
+            self._prompts[self._prompt_config_mode]["clues_phase"]
         )
         self._current_turn = 1
 
@@ -354,15 +300,23 @@ class AskGuess(Environment):
 
             if self._is_true_word(guess):
                 self._moderator_speak(
-                    f"{player_name} guessed the word correctly! The secret word is {self.word}. "
-                    f"You both won!"
+                    self._prompts[self._prompt_config_mode]["win_message"]
+                    .format(player_name=self.guesser)
+                    .replace(r"{{", "{")
+                    .replace(r"}}", "}"),
                 )
                 rewards = self.get_rewards(correct_guess=True)
                 self._correct_guess = True
                 self._is_terminal = True
             else:
                 self._moderator_speak(
-                    f"{player_name} guessed the word wrong. Now the speaker will give another clue! Don't forget to answer in the correct JSON format. "
+                    self._prompts[self._prompt_config_mode]["wrong_guess_message"]
+                    .format(player_name=self.guesser)
+                    .replace(r"{{", "{")
+                    .replace(r"}}", "}"),
+                )
+                self._moderator_speak(
+                    self._prompts[self._prompt_config_mode]["clues_phase"]
                 )
                 rewards = self.get_rewards(correct_guess=False)
 

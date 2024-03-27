@@ -36,7 +36,6 @@ PROMPT_CONFIG_FILE = os.path.join(dir_path, "askguess_prompt_config.yaml")
 with open(PROMPT_CONFIG_FILE) as file:
     prompts = yaml.safe_load(file)
 
-prompt_mode = "baseline"
 
 paya = Player(name="Paya",
                 role_desc=role_description,
@@ -52,16 +51,25 @@ with open(r"C:\Users\Louis\Documents\University\Masters\H24 - Deep NLP\ift6289-l
     word_list = json.load(fp)["wordict"]
 
 
+NB_EXPERIMENTS = 10
+MAX_STEPS = 20
+PROMPT_MODES = ["baseline", "bracket_format", "sentence_format", "format_reminder", "word_reminder"]
 # ================= EXPERIMENTS ================
-env = AskGuess(
-    player_names = ["Paya", "Toto"], 
-    word_list=word_list, 
-    prompt_config_file=PROMPT_CONFIG_FILE,
-    prompt_config_mode=prompt_mode,
-    )
 
-arena = Arena([paya, toto], env)
-arena.launch_cli(interactive=False, max_steps=20)
+for prompt_mode in PROMPT_MODES:
 
-# Saving history
-arena.save_chat(f"src/askguess/chat_history/baseline/askguess_{strftime('%Y_%m_%d_%H_%M_%S')}.json")
+    for i in range(NB_EXPERIMENTS):
+
+        # ====== Baseline =======
+        env = AskGuess(
+            player_names = ["Paya", "Toto"], 
+            word_list=word_list, 
+            prompt_config_file=PROMPT_CONFIG_FILE,
+            prompt_config_mode=prompt_mode,
+            )
+
+        arena = Arena([paya, toto], env)
+        arena.launch_cli(interactive=False, max_steps=MAX_STEPS)
+
+        # Saving history
+        arena.save_chat(f"src/askguess/chat_history/{prompt_mode}/askguess_{strftime('%Y_%m_%d_%H_%M_%S')}.json")

@@ -36,7 +36,7 @@ PROMPT_CONFIG_FILE = os.path.join(dir_path, "askguess_prompt_config.yaml")
 with open(PROMPT_CONFIG_FILE) as file:
     prompts = yaml.safe_load(file)
 
-prompt_mode = "baseline"
+prompt_mode = "word_reminder"
 
 paya = Player(name="Paya",
                 role_desc=role_description,
@@ -64,4 +64,4 @@ arena = Arena([paya, toto], env)
 arena.launch_cli(interactive=False, max_steps=20)
 
 # Saving history
-arena.save_chat(f"src/askguess/chat_history/baseline/askguess_{strftime('%Y_%m_%d_%H_%M_%S')}.json")
+arena.save_chat(f"src/askguess/chat_history/test/askguess_{strftime('%Y_%m_%d_%H_%M_%S')}.json")

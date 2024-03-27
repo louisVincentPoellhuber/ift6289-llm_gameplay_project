@@ -97,7 +97,7 @@ class AskGuess(Environment):
             visible_to=self.speaker,
         )
         self._moderator_speak(
-            self._prompts[self._prompt_config_mode]["clues_phase"]
+            self._prompts[self._prompt_config_mode]["initial_clues_phase"]
         )
         self._current_turn = 1
 
@@ -232,24 +232,17 @@ class AskGuess(Environment):
         ), f"Wrong player! It is {self.get_next_player()} turn."
         if self._current_phase == "give clues":
 
-            json_list = extract_jsons(action)
-            if "END_OF_CONVERSATION" in action:
-                self._ending_condition = "CE"
-                self._is_terminal = True
-                print(f"There was a chat error.")
-                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
-                return timestep # stop early to avoid json error
-            elif len(json_list) != 1:
-                self._ending_condition = "EE"
-                self._is_terminal = True
-                print(f"Player output {action} is not a valid json.")
-                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
-                return timestep # stop early to avoid json error
+            # Switch formats
+            if self._prompt_config_mode=="bracket_format":
+                clue, timestep = self.get_bracket_response(action)
+            elif self._prompt_config_mode=="sentence_format":
+                clue, timestep = self.get_sentence_response(action)
+            else:
+                clue, timestep = self.get_json_response(action)
 
-
-
-
-            clue = json_list[0].get("clue", None)
+            if timestep != None:
+                return timestep
+            
             if self.word in clue: 
                 self._ending_condition = "AME"
                 self._is_terminal = True
@@ -259,13 +252,18 @@ class AskGuess(Environment):
             message = Message(
                 agent_name=player_name, content=clue, turn=self._current_turn
             )
-            self.message_pool.append_message(message)
 
             # Update the counters
             self._current_turn += 1
-               
             self._current_phase = "guess"
 
+            if (self._prompt_config_mode == "format_reminder"):
+                self._moderator_speak(
+                    self._prompts[self._prompt_config_mode]["guesser_format"],
+                    visible_to=self.guesser
+                )
+            
+            self.message_pool.append_message(message)
             timestep = TimeStep(
                 observation=self.get_observation(),
                 reward=self.get_zero_rewards(),
@@ -273,23 +271,16 @@ class AskGuess(Environment):
             )  # Return all the messages
         elif self._current_phase == "guess":
 
-            json_list = extract_jsons(action)
-            if len(json_list) != 1:
-                self._ending_condition = "EE"
-                self._is_terminal = True
-                print(f"Player output {action} is not a valid json.")
-                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
-                return timestep
+            # Switch formats
+            if self._prompt_config_mode=="bracket_format":
+                guess, arguments, timestep = self.get_bracket_response(action)
+            elif self._prompt_config_mode=="sentence_format":
+                guess, arguments, timestep = self.get_sentence_response(action)
+            else:
+                guess, arguments, timestep = self.get_json_response(action)
 
-            if "END_OF_CONVERSATION" in action:
-                self._ending_condition = "CE"
-                self._is_terminal = True
-                print(f"There was a chat error.")
-                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+            if timestep != None:
                 return timestep
-            
-            guess = json_list[0].get("guess", None)
-            arguments = json_list[0].get("arguments", None)
 
             message = Message(
                 agent_name=player_name,
@@ -301,7 +292,7 @@ class AskGuess(Environment):
             if self._is_true_word(guess):
                 self._moderator_speak(
                     self._prompts[self._prompt_config_mode]["win_message"]
-                    .format(player_name=self.guesser)
+                    .format(player_name=self.guesser, word=self.word)
                     .replace(r"{{", "{")
                     .replace(r"}}", "}"),
                 )
@@ -315,12 +306,24 @@ class AskGuess(Environment):
                     .replace(r"{{", "{")
                     .replace(r"}}", "}"),
                 )
-                self._moderator_speak(
-                    self._prompts[self._prompt_config_mode]["clues_phase"]
-                )
                 rewards = self.get_rewards(correct_guess=False)
 
             self._current_phase = "give clues"
+            
+            if (self._prompt_config_mode == "format_reminder") & ~(self._is_terminal):
+                self._moderator_speak(
+                    self._prompts[self._prompt_config_mode]["speaker_format"],
+                    visible_to=self.speaker
+                )
+            elif (self._prompt_config_mode == "word_reminder"):
+                self._moderator_speak(
+                    self._prompts[self._prompt_config_mode]["secret_word_reminder"]
+                    .format(word=self.word)
+                    .replace(r"{{", "{")
+                    .replace(r"}}", "}"),
+                    visible_to=self.speaker
+                )
+
             timestep = TimeStep(observation=self.get_observation(), reward=rewards, terminal=self._is_terminal)
         else:
             raise ValueError(f"Unknown phase: {self._current_phase}")
@@ -329,3 +332,126 @@ class AskGuess(Environment):
             timestep.terminal = True
 
         return timestep
+    
+    def get_json_response(self, action):
+        if self._current_phase == "give clues":
+
+            json_list = extract_jsons(action)
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                clue = None
+            elif len(json_list) != 1:
+                self._ending_condition = "EE"
+                self._is_terminal = True
+                print(f"Player output {action} is not a valid json.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                clue = None
+            else:
+                timestep = None
+                clue = json_list[0].get("clue", None)
+
+            return clue, timestep
+        
+        elif self._current_phase == "guess":
+
+            json_list = extract_jsons(action)
+            if len(json_list) != 1:
+                self._ending_condition = "EE"
+                self._is_terminal = True
+                print(f"Player output {action} is not a valid json.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                guess = None
+                arguments = None
+
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                guess = None
+                arguments = None
+            else:
+                guess = json_list[0].get("guess", None)
+                arguments = json_list[0].get("arguments", None)
+                timestep = None
+
+            return guess, arguments, timestep
+
+    def get_bracket_response(self, action):
+        
+        if self._current_phase == "give clues":
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                clue = None
+            else:
+                clue = action
+                timestep = None
+            
+            return clue, timestep
+            
+        elif self._current_phase == "guess":
+            pattern = r'\[(.*?)\]'
+    
+            match = re.search(pattern, action)
+
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                clue = None
+            elif match:
+                guess = match.group(1)
+                arguments = action
+                timestep = None
+            else:
+                self._ending_condition = "EE"
+                self._is_terminal = True
+                print(f"Player output {action} does not contain brackets.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                guess = None
+                arguments = None
+
+            
+            return guess, arguments, timestep
+        
+    def get_sentence_response(self, action):
+        MAX_NB_WORDS = 2 # How many words does the format allow. By default 2, as none of our secret words are longer than 2. 
+        if self._current_phase == "give clues":
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                clue = None
+            else:
+                clue = action
+                timestep = None
+            
+            return clue, timestep
+                
+        elif self._current_phase == "guess":
+            sentences = action.split(".")
+            guess = sentences[0]
+            arguments = action
+            timestep = None
+
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+            elif guess.count(" ")>MAX_NB_WORDS:
+                self._ending_condition = "EE"
+                self._is_terminal = True
+                print(f"Player output {action} is not in the correct format.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                
+            return guess, arguments, timestep
+

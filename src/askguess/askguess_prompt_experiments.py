@@ -53,12 +53,14 @@ with open(r"C:\Users\Louis\Documents\University\Masters\H24 - Deep NLP\ift6289-l
 
 NB_EXPERIMENTS = 10
 MAX_STEPS = 20
-PROMPT_MODES = ["baseline", "bracket_format", "sentence_format", "format_reminder", "word_reminder"]
+PROMPT_MODES = ["best"]
 # ================= EXPERIMENTS ================
 
 for prompt_mode in PROMPT_MODES:
+    print(f"======================= Doing {prompt_mode} =======================")
 
     for i in range(NB_EXPERIMENTS):
+        print(f"Experiment {i}.")
 
         # ====== Baseline =======
         env = AskGuess(

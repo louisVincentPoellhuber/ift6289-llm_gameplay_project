@@ -233,7 +233,7 @@ class AskGuess(Environment):
         if self._current_phase == "give clues":
 
             # Switch formats
-            if self._prompt_config_mode=="bracket_format":
+            if (self._prompt_config_mode=="bracket_format") | (self._prompt_config_mode=="best"):
                 clue, timestep = self.get_bracket_response(action)
             elif self._prompt_config_mode=="sentence_format":
                 clue, timestep = self.get_sentence_response(action)
@@ -241,6 +241,9 @@ class AskGuess(Environment):
                 clue, timestep = self.get_json_response(action)
 
             if timestep != None:
+                final_output = f"[Final Message] {action}"
+
+                self._moderator_speak(final_output)
                 return timestep
             
             if self.word in clue: 
@@ -272,7 +275,7 @@ class AskGuess(Environment):
         elif self._current_phase == "guess":
 
             # Switch formats
-            if self._prompt_config_mode=="bracket_format":
+            if (self._prompt_config_mode=="bracket_format") | (self._prompt_config_mode=="best"):
                 guess, arguments, timestep = self.get_bracket_response(action)
             elif self._prompt_config_mode=="sentence_format":
                 guess, arguments, timestep = self.get_sentence_response(action)
@@ -280,6 +283,9 @@ class AskGuess(Environment):
                 guess, arguments, timestep = self.get_json_response(action)
 
             if timestep != None:
+                final_output = f"[Final Message] {action}"
+
+                self._moderator_speak(final_output)
                 return timestep
 
             message = Message(
@@ -315,7 +321,7 @@ class AskGuess(Environment):
                     self._prompts[self._prompt_config_mode]["speaker_format"],
                     visible_to=self.speaker
                 )
-            elif (self._prompt_config_mode == "word_reminder"):
+            elif (self._prompt_config_mode == "word_reminder") & ~(self._is_terminal):
                 self._moderator_speak(
                     self._prompts[self._prompt_config_mode]["secret_word_reminder"]
                     .format(word=self.word)
@@ -343,6 +349,7 @@ class AskGuess(Environment):
                 print(f"There was a chat error.")
                 timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
                 clue = None
+            
             elif len(json_list) != 1:
                 self._ending_condition = "EE"
                 self._is_terminal = True
@@ -358,18 +365,18 @@ class AskGuess(Environment):
         elif self._current_phase == "guess":
 
             json_list = extract_jsons(action)
-            if len(json_list) != 1:
-                self._ending_condition = "EE"
-                self._is_terminal = True
-                print(f"Player output {action} is not a valid json.")
-                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
-                guess = None
-                arguments = None
-
             if "END_OF_CONVERSATION" in action:
                 self._ending_condition = "CE"
                 self._is_terminal = True
                 print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                guess = None
+                arguments = None
+                
+            elif len(json_list) != 1:
+                self._ending_condition = "EE"
+                self._is_terminal = True
+                print(f"Player output {action} is not a valid json.")
                 timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
                 guess = None
                 arguments = None

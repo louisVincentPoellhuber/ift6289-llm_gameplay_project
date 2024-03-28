@@ -1,0 +1,7 @@
+,N,ST,EE,RLE,CE,AME,RWE
+baseline,10,0.8,0.2,0,0,0,0
+bracket_format,10,0.7,0.3,0,0,0,0
+sentence_format,10,0.7,0.3,0,0,0,0
+format_reminder,10,0.7,0.1,0.2,0,0,0
+word_reminder,10,0.8,0.1,0,0,0.1,0
+best,10,0.8,0.1,0,0,0.1,0

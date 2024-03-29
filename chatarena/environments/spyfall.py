@@ -62,6 +62,9 @@ class SpyFall(Environment):
         self._prompt_config_mode = prompt_config_mode
         self._prompt_config_prompt_config_file = prompt_config_file
 
+        # number of roungs
+        self._ONE_ROUND = True
+
         # Reading prompt configs
         with open(self._prompt_config_prompt_config_file, "r") as file:
             self._prompts = yaml.safe_load(file)
@@ -140,15 +143,12 @@ class SpyFall(Environment):
     def _text2vote(self, text) -> str:
         """Convert text to vote, return a player's name."""
         # lower = text.lower().replace("[", "").replace("]", "").replace(".", "")
-        text = text.lower()
-        for name in self.player_names:
-            candidates = [
-                name.lower(),
-                name.lower().replace(" ", ""),
-                name.lower().replace(" ", "_"),
-            ]
-            if any([candidate in text for candidate in candidates]):
-                return name
+        # text = text.lower()
+        found_names = [candidate in text for candidate in self.player_names]
+        if any(found_names):
+            for i, status in enumerate(found_names):
+                if status:
+                    return self.player_names[i]
         return ""
 
     def _is_true_code(self, text) -> bool:
@@ -228,6 +228,15 @@ class SpyFall(Environment):
 
         return metrics
 
+    def _get_word_and_argument(self, action, json_list, response_format):
+        if response_format == "json":
+            word = json_list[0].get("word", None)
+            arguments = json_list[0].get("arguments", None)
+        elif response_format == "string":
+            word = None
+            arguments = action
+        return word, arguments
+
     def step(self, player_name: str, action: str) -> TimeStep:
         """
         Step function that is called by the arena.
@@ -250,7 +259,10 @@ class SpyFall(Environment):
 
             ## PARSE RESPONSE see askguess
             # print("Content action:", action)
-            json_list = extract_jsons(action)
+            json_list = []
+            if self._prompts[self._prompt_config_mode]["response_format"] == "json":
+                json_list = extract_jsons(action)
+
             if "END_OF_CONVERSATION" in action:
                 self._end_condition = "CE"
                 self._is_terminal = True
@@ -262,19 +274,25 @@ class SpyFall(Environment):
                     terminal=self._is_terminal,
                 )
                 return timestep  # stop early to avoid json error
-            elif len(json_list) != 1:
-                self._end_condition = "EE"
-                self._is_terminal = True
-                print(f"Player output {action} is not a valid json.")
-                timestep = TimeStep(
-                    observation=self.get_observation(),
-                    reward=self.get_zero_rewards(),
-                    terminal=self._is_terminal,
-                )
-                return timestep  # stop early to avoid json error
+            elif self._prompts[self._prompt_config_mode]["response_format"] == "json":
+                if len(json_list) != 1:
+                    self._end_condition = "EE"
+                    self._is_terminal = True
+                    print(f"Player output {action} is not a valid json.")
+                    timestep = TimeStep(
+                        observation=self.get_observation(),
+                        reward=self.get_zero_rewards(),
+                        terminal=self._is_terminal,
+                    )
+                    return timestep  # stop early to avoid json error
 
-            word = json_list[0].get("word", None)
-            arguments = json_list[0].get("arguments", None)
+            word, arguments = self._get_word_and_argument(
+                action=action,
+                json_list=json_list,
+                response_format=self._prompts[self._prompt_config_mode][
+                    "response_format"
+                ],
+            )
 
             message = Message(
                 agent_name=player_name,
@@ -303,8 +321,13 @@ class SpyFall(Environment):
             )  # Return all the messages
 
         elif self._current_phase == "accuse":
-            json_list = extract_jsons(action)
+
+            json_list = []
+            if self._prompts[self._prompt_config_mode]["response_format"] == "json":
+                json_list = extract_jsons(action)
+
             # print("Accuse action:", action)
+
             if "END_OF_CONVERSATION" in action:
                 self._end_condition = "CE"
                 self._is_terminal = True
@@ -315,20 +338,27 @@ class SpyFall(Environment):
                     terminal=self._is_terminal,
                 )
                 return timestep  # stop early to avoid json error
-            elif len(json_list) != 1:
-                self._end_condition = "EE"
-                self._is_terminal = True
 
-                print(f"Player output {action} is not a valid json.")
-                timestep = TimeStep(
-                    observation=self.get_observation(),
-                    reward=self.get_zero_rewards(),
-                    terminal=self._is_terminal,
-                )
-                return timestep  # stop early to avoid json error
+            elif self._prompts[self._prompt_config_mode]["response_format"] == "json":
+                if len(json_list) != 1:
+                    self._end_condition = "EE"
+                    self._is_terminal = True
 
-            word = json_list[0].get("word", None)
-            arguments = json_list[0].get("arguments", None)
+                    print(f"Player output {action} is not a valid json.")
+                    timestep = TimeStep(
+                        observation=self.get_observation(),
+                        reward=self.get_zero_rewards(),
+                        terminal=self._is_terminal,
+                    )
+                    return timestep  # stop early to avoid json error
+
+            word, arguments = self._get_word_and_argument(
+                action=action,
+                json_list=json_list,
+                response_format=self._prompts[self._prompt_config_mode][
+                    "response_format"
+                ],
+            )
 
             message = Message(
                 agent_name=player_name,
@@ -384,32 +414,38 @@ class SpyFall(Environment):
                             )
                         )
                         # remove the max_vote_player
-                        # print(f"Removing player {max_vote_player}")
+                        # print(f"Removing player {max_vote_player}"
+
                         self.player_names.remove(max_vote_player)
 
                     # change the game self._current_phase = "give clues"
-                    self._current_phase = "give clues"
+                    if not self._ONE_ROUND:
+                        self._current_phase = "give clues"
+                        self._players_votes = {name: 0 for name in self.player_names}
 
-                    self._next_player_idx = 0
+                        self._next_player_idx = 0
 
-                    ## Moderator says that it's describing phase again
-                    self._moderator_speak(
-                        self._prompts[self._prompt_config_mode]["describing_phase"]
-                        .format(player=self.player_names[0])
-                        .replace(r"{{", "{")
-                        .replace(r"}}", "}")
-                    )
-
-                    if len(self.player_names) < 4:
-                        # Moderator says that spy wins
+                        ## Moderator says that it's describing phase again
                         self._moderator_speak(
-                            self._prompts[self._prompt_config_mode][
-                                "moderator_says_spy_wins"
-                            ]
+                            self._prompts[self._prompt_config_mode]["describing_phase"]
+                            .format(player=self.player_names[0])
+                            .replace(r"{{", "{")
+                            .replace(r"}}", "}")
                         )
-                        rewards = self.get_rewards(spy_win=True)
-                        self._end_condition = "SPYWINS"  # spy wins
+
+                        if len(self.player_names) < 4:
+                            # Moderator says that spy wins
+                            self._moderator_speak(
+                                self._prompts[self._prompt_config_mode][
+                                    "moderator_says_spy_wins"
+                                ]
+                            )
+                            rewards = self.get_rewards(spy_win=True)
+                            self._end_condition = "SPYWINS"  # spy wins
+                            terminal = True
+                    else:
                         terminal = True
+                        self._end_condition = "SPYWINS"
                 else:
                     self._end_condition = "SPYLOOSES"  # SW
                     self._moderator_speak(

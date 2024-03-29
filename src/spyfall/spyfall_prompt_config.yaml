@@ -53,14 +53,14 @@ json_format_specification: |
 
 
 baseline:
+  response_format: string
   moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
   describing_phase: >
-    ========= Describing phase =========
     Host: Now it's the describing stage, players have to say something about the received
     word without directly saying it.
     You cannot repeat what others has said. We will start with {player}.
+    
   voting_phase: >
-    ========= Voting phase =========
     Host: Now the voting start, please vote for the player you think is the spy and tell the 
     reason why you think he is the spy.
   moderator_says_even_votes: There are even votes. The accusation does not stand.
@@ -74,9 +74,9 @@ baseline:
 
 
 remember_json:
+  response_format: json
   moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
   describing_phase: |
-    ========= Describing phase ========= 
     Host: Now it's the describing stage, players have to say something about the received
     word without directly saying it.
     You cannot repeat what others has said. We will start with {player}.
@@ -97,7 +97,6 @@ remember_json:
       "required": ["word", "arguments"]
     }}
   voting_phase: |
-    ========= Voting stage =========
     Host: Now the voting start, please vote for the player you think is the spy and tell the reason why you think he is the spy. 
     Do not say your word. Remember the JSON format for your answer:
     {
@@ -126,9 +125,9 @@ remember_json:
 
 
 remember_json_and_not_to_say_word:
+  response_format: json
   moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
   describing_phase: |
-    ========= Describing phase ========= 
     Host: Now it's the describing stage, players have to say something about the received word without directly saying it.
     You cannot repeat what others has said. We will start with {player}.
     Don't forget to answer in the correct JSON format for your answer:
@@ -149,7 +148,6 @@ remember_json_and_not_to_say_word:
     }}s
     Do not say your word.
   voting_phase: |
-    ========= Voting stage =========
     Host: Now the voting start, please vote for the player you think is the spy and tell the reason why you think he is the spy.
     Do not say your word. Remember the JSON format for your answer:
     {
@@ -178,9 +176,9 @@ remember_json_and_not_to_say_word:
 
 
 remember_json_not_to_interact:
+  response_format: json
   moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
   describing_phase: |
-    ========= Describing phase =========
     Host: Now it's the describing stage, players have to say something about the received word without directly saying it.
     You cannot repeat what others has said. We will start with {player}.
     Don't forget to answer in the correct JSON format for your answer:
@@ -201,7 +199,6 @@ remember_json_not_to_interact:
     }}
     Do not say your word and do not interact with the other players yet.
   voting_phase: |
-    ========= Voting phase =========
     Host: Now the voting start, please vote for the player you think is the spy and tell the reason why you think he is the spy.
     Do not say your word. Remember the JSON format for your answer:
     {
@@ -214,6 +211,62 @@ remember_json_not_to_interact:
         },
         "arguments": {
           "description": "what you are going to say to your opponent",
+          "type": "string"
+        }
+      },
+      "required": ["word", "arguments"]
+    }
+  moderator_says_even_votes: There are even votes. The accusation does not stand.
+  moderator_says_wrong_guess: |
+    Votes: {player_votes}.
+    The most-voted player is {most_voted_player}. The accusation is incorrect.
+    Removing player: {most_voted_player}.
+  moderator_says_spy_wins: Less than 4 players now! Spy wins.
+  moderator_says_villagers_win: The accusation is correct! {spy_name} is the spy!
+
+
+  ## until here they kept forgetting the json format and the game kept ending
+  ## lets create a more rigid template.
+  ## they also kept impersonating the host and hallucinating.
+
+remember_json_guessing_format:
+  response_format: json
+  moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
+  describing_phase: |
+    Host: Now it's the describing stage, players have to say something about the received word without directly saying it.
+    You cannot repeat what others has said. We will start with {player}.
+    Don't forget to answer in the correct JSON format for your answer:
+    {{
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {{
+        "word": {{
+          "description": "your secret word",
+          "type": "string"
+        }},
+        "arguments": {{
+          "description": "what you are going to say to your opponent",
+          "type": "string"
+        }}
+      }},
+      "required": ["word", "arguments"]
+    }}
+    Do not say your word and do not interact with the other players yet.
+  voting_phase: |
+    Host: Now the voting start, please vote for the player you think is the spy and tell the reason why you think he is the spy.
+    Do not say your word. Remember that you are not the host.
+    Use and fill the JSON template by replacing <name> with whoever you thing it its the spy and <reason> with your reason why you believe that they are the spy.
+    Don't forget the JSON format for your answer:
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "word": {
+          "description": "your secret word",
+          "type": "string"
+        },
+        "arguments": {
+          "description": "I believe that <name> is the spy because of <reason>",
           "type": "string"
         }
       },

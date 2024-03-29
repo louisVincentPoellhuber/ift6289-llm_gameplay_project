@@ -31,45 +31,58 @@ backend = CohereAIChat()
 
 # Name of the players
 number_of_players = 6
-players = ["Nancy", "Tom", "Cindy", "Jack", "Rose", "Edward"][:number_of_players]
 
-
+# Opening configurations
 with open(PROMPT_CONFIG_FILE) as file:
     prompts = yaml.safe_load(file)
 
-# First description of the game -> taken from GameEval
-role_description = prompts["role_description"].format(number_of_players=len(players))
-# Chatarena format
-format_specification = prompts["json_format_specification"]
-
-random.shuffle(players)
-players_list = [
-    Player(
-        name=players[i],
-        role_desc=role_description + format_specification,
-        backend=backend,
-    )
-    for i in range(len(players[:number_of_players]))
-]
-
-prompt_mode = "remember_json_not_to_interact"
+# prompt_mode = "remember_json"
 prompt_modes = [
-    "baseline",
+    # "baseline",
     "remember_json",
-    "remember_json_and_not_to_say_word",
-    "remember_json_not_to_interact",
+    # "remember_json_and_not_to_say_word",
+    # "remember_json_not_to_interact",
+    # "remember_json_guessing_format",
 ]
+repetitions = 12
 for prompt_mode in prompt_modes:
-    # Running experiment
-    env = SpyFall(
-        player_names=players,
-        prompt_config_file=PROMPT_CONFIG_FILE,
-        prompt_config_mode=prompt_mode,
-    )
-    arena = Arena(players_list, env)
-    arena.launch_cli(interactive=False, max_steps=40)
+    for _ in range(repetitions):
+        print("\n\n", "-----------------------------------")
+        print(f"PROMPT MODE:", prompt_mode, "\n\n")
 
-    # Saving history
-    arena.save_chat(
-        f"src/spyfall/chat_history/spyfall_{strftime('%Y_%m_%d_%H_%M_%S')}_{prompt_mode}.json"
-    )
+        # Defining players
+        players = ["Nancy", "Tom", "Cindy", "Jack", "Rose", "Edward"][
+            :number_of_players
+        ]
+        random.shuffle(players)
+        # First description of the game -> taken from GameEval
+        role_description = prompts["role_description"].format(
+            number_of_players=len(players)
+        )
+        # Chatarena output format
+        format_specification = prompts["json_format_specification"]
+        if prompts[prompt_mode]["response_format"] == "string":
+            format_specification = ""
+
+        players_list = [
+            Player(
+                name=players[i],
+                role_desc=role_description + format_specification,
+                backend=backend,
+            )
+            for i in range(len(players[:number_of_players]))
+        ]
+
+        # Running experiment
+        env = SpyFall(
+            player_names=players,
+            prompt_config_file=PROMPT_CONFIG_FILE,
+            prompt_config_mode=prompt_mode,
+        )
+        arena = Arena(players_list, env)
+        arena.launch_cli(interactive=False, max_steps=40)
+
+        # Saving history
+        arena.save_chat(
+            f"src/spyfall/chat_history/one_round/spyfall_{prompt_mode}_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
+        )

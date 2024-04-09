@@ -22,6 +22,26 @@ DEFAULT_TOPIC_CODES = {
         "Soccer",
         "Basketball",
     ],
+    "Transport": [
+        "Airplane",
+        "Hellicopter",
+    ],
+    "Official places": [
+        "Police Station",
+        "Fire",
+    ],
+    "Instruments": [
+        "Electic Guitar",
+        "Acoustic Guitar",
+    ],
+    "Furniture": [
+        "Sofa",
+        "Chair",
+    ],
+    "Tools": [
+        "Hammer",
+        "Screwdriver",
+    ],
 }
 
 
@@ -63,7 +83,7 @@ class SpyFall(Environment):
         self._prompt_config_prompt_config_file = prompt_config_file
 
         # number of roungs
-        self._ONE_ROUND = True
+        self._ONE_ROUND = False
 
         # Reading prompt configs
         with open(self._prompt_config_prompt_config_file, "r") as file:
@@ -144,11 +164,16 @@ class SpyFall(Environment):
         """Convert text to vote, return a player's name."""
         # lower = text.lower().replace("[", "").replace("]", "").replace(".", "")
         # text = text.lower()
-        found_names = [candidate in text for candidate in self.player_names]
-        if any(found_names):
-            for i, status in enumerate(found_names):
-                if status:
-                    return self.player_names[i]
+        # print(text)
+        try:
+            found_names = [candidate in text for candidate in self.player_names]
+            if any(found_names):
+                for i, status in enumerate(found_names):
+                    if status:
+                        return self.player_names[i]
+        except:
+            print("No name found")
+            print("Text:", text)
         return ""
 
     def _is_true_code(self, text) -> bool:
@@ -195,9 +220,13 @@ class SpyFall(Environment):
     def is_terminal(self) -> bool:
         """Check if the conversation is over."""
         # If the last message is the signal, then the conversation is over
-        if self.message_pool.last_message.content.startswith(
-            SIGNAL_END_OF_CONVERSATION
-        ):
+        try:
+            if self.message_pool.last_message.content.startswith(
+                SIGNAL_END_OF_CONVERSATION
+            ):
+                print("============ SIGNAL_END_OF_CONVERSATION ============")
+                return True
+        except AttributeError:
             return True
 
     def get_disposition(self) -> Dict:
@@ -230,8 +259,11 @@ class SpyFall(Environment):
 
     def _get_word_and_argument(self, action, json_list, response_format):
         if response_format == "json":
-            word = json_list[0].get("word", None)
-            arguments = json_list[0].get("arguments", None)
+            try:
+                word = json_list[0].get("word", None)
+                arguments = json_list[0].get("arguments", None)
+            except:
+                print("JSON ERROR")
         elif response_format == "string":
             word = None
             arguments = action

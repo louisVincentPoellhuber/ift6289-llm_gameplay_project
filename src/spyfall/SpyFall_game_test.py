@@ -38,13 +38,12 @@ with open(PROMPT_CONFIG_FILE) as file:
 
 # prompt_mode = "remember_json"
 prompt_modes = [
-    # "baseline",
-    "remember_json",
-    # "remember_json_and_not_to_say_word",
-    # "remember_json_not_to_interact",
+    "baseline",
     # "remember_json_guessing_format",
+    # "remember_sentence_format",
+    # "remember_bracket_format"
 ]
-repetitions = 12
+repetitions = 1
 for prompt_mode in prompt_modes:
     for _ in range(repetitions):
         print("\n\n", "-----------------------------------")
@@ -82,7 +81,8 @@ for prompt_mode in prompt_modes:
         arena = Arena(players_list, env)
         arena.launch_cli(interactive=False, max_steps=40)
 
+        postfix = f"{prompt_mode}_{strftime('%Y_%m_%d_%H_%M_%S')}"
         # Saving history
         arena.save_chat(
-            f"src/spyfall/chat_history/one_round/spyfall_{prompt_mode}_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
+            f"src/spyfall/chat_history/29_03_24/spyfall_{prompt_mode}_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
         )

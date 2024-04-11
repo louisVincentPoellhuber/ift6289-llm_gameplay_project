@@ -20,7 +20,7 @@ else:
 
 # Default config follows the [Cohere documentation](https://cohere-sdk.readthedocs.io/en/latest/cohere.html#cohere.client.Client.chat)
 DEFAULT_TEMPERATURE = 0.8
-DEFAULT_MAX_TOKENS = 200
+DEFAULT_MAX_TOKENS = 1000
 DEFAULT_MODEL = "command-xlarge"
 
 

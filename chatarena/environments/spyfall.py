@@ -6,7 +6,7 @@ from typing import Dict, List, Union
 from ..agent import SIGNAL_END_OF_CONVERSATION
 from ..message import Message, MessagePool
 from .base import Environment, TimeStep, register_env
-from ..utils import extract_jsons
+from ..utils import extract_jsons_spyfall
 
 
 DEFAULT_TOPIC_CODES = {
@@ -260,8 +260,8 @@ class SpyFall(Environment):
     def _get_word_and_argument(self, action, json_list, response_format):
         if response_format == "json":
             try:
-                word = json_list[0].get("word", None)
-                arguments = json_list[0].get("arguments", None)
+                word = json_list[0]["properties"]["word"]["description"]
+                arguments = json_list[0]["properties"]["arguments"]["description"]
             except:
                 print("JSON ERROR")
         elif response_format == "string":
@@ -293,7 +293,7 @@ class SpyFall(Environment):
             # print("Content action:", action)
             json_list = []
             if self._prompts[self._prompt_config_mode]["response_format"] == "json":
-                json_list = extract_jsons(action)
+                json_list = extract_jsons_spyfall(action)
 
             if "END_OF_CONVERSATION" in action:
                 self._end_condition = "CE"
@@ -356,7 +356,7 @@ class SpyFall(Environment):
 
             json_list = []
             if self._prompts[self._prompt_config_mode]["response_format"] == "json":
-                json_list = extract_jsons(action)
+                json_list = extract_jsons_spyfall(action)
 
             # print("Accuse action:", action)
 

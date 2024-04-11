@@ -22,6 +22,7 @@ role_description: |
   If there are less than three players, and the spy still lives, then the spy wins.
 
 json_format_specification: |
+  Always use this JSON template in your answer:
   {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",

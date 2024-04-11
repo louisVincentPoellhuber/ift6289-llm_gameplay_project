@@ -58,6 +58,38 @@ def extract_jsons(text):
             pass
     return parsed_jsons
 
+def extract_jsons_spyfall(text):
+    """
+    Extracts all valid JSON objects from a given string using a stack-based method to handle nested structures.
+    
+    Parameters:
+        text (str): The string from which JSON objects are to be extracted.
+
+    Returns:
+        List[Dict]: A list of all extracted JSON objects.
+    """
+    objects = []
+    depth = 0
+    start_index = -1
+    
+    # Iterate over each character in the string with its index
+    for index, char in enumerate(text):
+        if char == '{':
+            if depth == 0:
+                start_index = index  # Potential beginning of a JSON object
+            depth += 1
+        elif char == '}':
+            depth -= 1
+            if depth == 0 and start_index != -1:
+                # End of a JSON object
+                try:
+                    obj = json.loads(text[start_index:index+1])
+                    objects.append(obj)
+                except json.JSONDecodeError:
+                    pass
+                start_index = -1  # Reset start index
+                
+    return objects
 
 def extract_code(text):
     """

@@ -66,7 +66,7 @@ for prompt_mode in prompt_modes:
         players_list = [
             Player(
                 name=players[i],
-                role_desc=role_description,  # + format_specification,
+                role_desc=role_description + format_specification,
                 backend=backend,
             )
             for i in range(len(players[:number_of_players]))

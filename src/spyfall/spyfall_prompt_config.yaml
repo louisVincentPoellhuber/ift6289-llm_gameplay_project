@@ -56,12 +56,12 @@ json_format_specification: |
 #   response_format: string
 #   moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
 #   describing_phase: >
-#     Host: Now it's the describing stage, players have to say something about the received
+#     Now it's the describing stage, players have to say something about the received
 #     word without directly saying it.
 #     You cannot repeat what others has said. We will start with {player}.
     
 #   voting_phase: >
-#     Host: Now the voting start, please analyse all players text and vote for the player you think is the spy and tell the 
+#     Now the voting start, please analyse all players text and vote for the player you think is the spy and tell the 
 #     reason why you think he is the spy.
 #   moderator_says_even_votes: There are even votes. The accusation does not stand.
 #   moderator_says_wrong_guess: |
@@ -81,13 +81,13 @@ baseline:
   response_format: json
   moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
   describing_phase: |
-    Host: Now it's the describing stage, players have to say something about the received
+    Now it's the describing stage, players have to say something about the received
     word without directly saying it.
     You cannot repeat what others has said. We will start with {player}.
     Don't forget to answer in the correct JSON format for your answer.
     Do not say your word and do not interact with the other players yet.
   voting_phase: |
-    Host: Now the voting start, please analyse all players text and vote for the player you think is the spy and tell the reason why you think he or she is the spy. 
+    Now the voting start, please analyse all players text and vote for the player you think is the spy and tell the reason why you think he or she is the spy. 
     Remember the JSON format for your answer.
   moderator_says_even_votes: There are even votes. The accusation does not stand.
   moderator_says_wrong_guess: |
@@ -110,19 +110,19 @@ remember_json_guessing_format:
   response_format: json
   moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
   describing_phase: |
-    Host: Now it's the describing stage, players have to say something about the received word without directly saying it.
+    Now it's the describing stage, players have to say something about the received word without directly saying it.
     You cannot repeat what others has said. We will start with {player}.
-    Don't forget to answer in the correct JSON format for your answer:
+    Don't forget to answer in the correct JSON format for your answer, changing <your secret word> and <what you are going to say to your opponent>:
     {{
       "$schema": "http://json-schema.org/draft-07/schema#",
       "type": "object",
       "properties": {{
         "word": {{
-          "description": "your secret word",
+          "description": "<your secret word>",
           "type": "string"
         }},
         "arguments": {{
-          "description": "what you are going to say to your opponent",
+          "description": "<what you are going to say to your opponent>",
           "type": "string"
         }}
       }},
@@ -130,7 +130,7 @@ remember_json_guessing_format:
     }}
     Do not say your word and do not interact with the other players yet.
   voting_phase: |
-    Host: Now the voting start, please analyse all players text and vote for the player you think is the spy and tell the reason why you think he is the spy.
+    Now the voting start, please analyse all players text and vote for the player you think is the spy and tell the reason why you think he is the spy.
     Do not say your word. Remember that you are not the host.
     Use and fill the JSON template by replacing <name> with whoever you thing it its the spy and <reason> with your reason why you believe that they are the spy.
     Don't forget the JSON format for your answer:
@@ -166,11 +166,11 @@ remember_sentence_format:
   response_format: string
   moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
   describing_phase: |
-    Host: Now it's the describing stage, players have to say something about the received word without directly saying it.
+    Now it's the describing stage, players have to say something about the received word without directly saying it.
     You cannot repeat what others has said. We will start with {player}.
     Do not say your word and do not interact with the other players yet.
   voting_phase: |
-    Host: Now the voting start, please analyse all players text and vote for the player you think is the spy and tell the reason why you think he is the spy.
+    Now the voting start, please analyse all players text and vote for the player you think is the spy and tell the reason why you think he is the spy.
     Do not say your word.
     You should always provide the person you think it's the spy as the first word of your response, followed by a dot. 
     This is an example of your output between both the ```:
@@ -196,12 +196,12 @@ remember_bracket_format:
   guess_format: brackets
   moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
   describing_phase: |
-    Host: Now it's the describing stage, players have to say something about the received word without directly saying it.
+    Now it's the describing stage, players have to say something about the received word without directly saying it.
     You cannot repeat what others has said. We will start with {player}.
     Do not say your word and do not interact with the other players yet.
     You are not the host, please describe your word now.
   voting_phase: |
-    Host: Now the voting start, please analyse all players text and vote for the player you think is the spy and tell the reason why you think he is the spy.
+    Now the voting start, please analyse all players text and vote for the player you think is the spy and tell the reason why you think he is the spy.
     Do not say your word. Remember that you are not the host.
     You should always provide your guess within brackets. It can be anywhere in your answer. For example:
     '''

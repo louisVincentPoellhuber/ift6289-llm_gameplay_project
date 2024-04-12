@@ -130,6 +130,7 @@ remember_json_guessing_format:
       "required": ["word", "arguments"]
     }}
     Do not say your word and do not interact with the other players yet.
+    Describe your word now and use the JSON format.
   voting_phase: |
     Now the voting start, please analyse all players text and vote for the player you think is the spy and tell the reason why you think he is the spy.
     Do not say your word. Remember that you are not the host.
@@ -144,12 +145,13 @@ remember_json_guessing_format:
           "type": "string"
         },
         "arguments": {
-          "description": "I believe that <name> is the spy because of <reason>",
+          "description": "I believe that <name> is the spy because of <reason>.",
           "type": "string"
         }
       },
       "required": ["word", "arguments"]
     }
+    Now read all the descriptions and vote for whoever you believe the spy is and use the JSON format.
   moderator_says_even_votes: There are even votes. The accusation does not stand.
   moderator_says_wrong_guess: |
     Votes: {player_votes}.

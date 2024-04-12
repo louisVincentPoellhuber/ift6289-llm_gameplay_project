@@ -264,6 +264,12 @@ class SpyFall(Environment):
                 arguments = json_list[0]["properties"]["arguments"]["description"]
             except:
                 print("JSON ERROR")
+                try:
+                    # response_dict = ast.literal_eval(json_list[0])
+                    word = json_list[0]["word"]
+                    arguments = json_list[0]["arguments"]
+                except:
+                    print("DICT ERROR")
         elif response_format == "string":
             word = None
             arguments = action

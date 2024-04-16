@@ -7,13 +7,13 @@ from dotenv import load_dotenv
 import random
 
 # sys.stdout = open("output_spyfall.txt", "w")
+# Loading dotenv
+load_dotenv()
 
 # Configuring path from the library
 CHATARENA_PATH = os.getenv("CHATARENA_PATH")
 sys.path.append(CHATARENA_PATH)
 
-# Loading dotenv
-load_dotenv()
 
 from chatarena.arena import Arena
 from chatarena.agent import Player

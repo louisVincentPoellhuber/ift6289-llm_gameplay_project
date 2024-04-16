@@ -1,3 +1,7 @@
+# DEBUG
+# We've had to add some breakpoints, prints and some modifications 
+# to make this work. 
+
 import logging
 import re
 import uuid

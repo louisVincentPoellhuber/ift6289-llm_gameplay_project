@@ -1,3 +1,11 @@
+# EDIT
+# This file was mostly lightly edited by us, with the addition of a new
+# save_chat function. This file is what allows the Environment to progress
+# normally and makes the connection between the Environment's messages and 
+# the backend's responses. 
+#
+# You can use ctrl+f to find the other EDIT tags before the functions we've changed. 
+
 import csv
 import json
 import logging
@@ -199,6 +207,10 @@ class Arena:
         else:
             raise ValueError("Invalid file format")
 
+    # EDIT
+    # This function expands on the function right above, save_history. Just like it, 
+    # it saves the conversation messages, as well as more information, described 
+    # in the README.  
     def save_chat(self, path: str):
         if not path.endswith(".json"):
             raise ValueError(

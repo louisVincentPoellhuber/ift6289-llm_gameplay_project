@@ -1,3 +1,10 @@
+# EDIT
+# This is a file that we've extensively edited. The default Cohere implementation was 
+# outdated by many versions, thus we've had to reimplement most of the functions 
+# described here. 
+#
+# You can use ctrl+f to find the other EDIT tags before the functions we've changed. 
+
 import time
 import os
 from typing import List, Union
@@ -31,6 +38,8 @@ class CohereAIChat(IntelligenceBackend):
     stateful = True
     type_name = "cohere-chat"
 
+    # EDIT
+    # Initializes the Cohere model with the correct API key and other important informations. 
     def __init__(
         self,
         temperature: float = DEFAULT_TEMPERATURE,
@@ -61,6 +70,10 @@ class CohereAIChat(IntelligenceBackend):
         self.session_id = None
         self.last_msg_hash = None
 
+    # EDIT
+    # This function is the generic query function for all LLMs. The chat function was 
+    # added, as well as all its parameters. We've also added the END_OF_CONVERSATION 
+    # tag to signal a chat error. 
     @retry(stop=stop_after_attempt(2), wait=wait_random_exponential(min=1, max=60))
     def _get_response(
         self, new_message: str, persona_prompt: Union[dict], verbose=False
@@ -84,6 +97,9 @@ class CohereAIChat(IntelligenceBackend):
             return "END_OF_CONVERSATION"
         return response.text
 
+    # EDIT
+    # This compiles all the available messages to the LLM. We've had to rework how 
+    # the messages are structred to send it to Cohere. 
     def query(
         self,
         agent_name: str,

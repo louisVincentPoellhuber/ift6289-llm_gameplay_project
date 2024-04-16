@@ -1,3 +1,15 @@
+# NEW
+# This is a brand-new Environment that our team has implemented. It holds all the 
+# game logic for the game Spyfall.
+# 
+# A typical game will start with the Arena running the __init__ function. Then, it
+# will run the step function until an ending state is reached. 
+#
+# Ask-guess iterates through two phases between steps: the "give clues" phase and 
+# the "accuse" phase. In the step function, you can find a large IF statement that 
+# switches the step logic depending on each phase. Other functions simply support
+# the main game logic. 
+
 import yaml
 import random
 import re

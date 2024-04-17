@@ -1,25 +1,5 @@
 role_description: |
-  Now you are playing the game called "who is the spy".
-
-  There are {number_of_players} players in this game. 
-  At the beginning of the game, everyone will receive a word.
-  There is one spy who will receive a spy word, while others will receive a common word.
-  Spy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".
-
-  There are two stages in each round of the game.
-
-  The first stage is describing stage:
-  Everyone needs to use a word or a few words to say something in turn about the word he received without directly saying the word.
-  The funniest part of the game is that since you do not know other's words, you are not sure whether you are the spy.
-  So, you can only infer who have the different based on other players description.
-
-  The second stage is the voting stage:
-  After everyone speaks, each player must vote for a player who he thinks is the spy and tell others why. 
-  Players can not repeat other players' speeches or their own speeches in the previous round. 
-  The player getting the most votes will be eliminated from the game.
-
-  If the spy is eliminated, the rest of the players win.
-  If there are less than three players, and the spy still lives, then the spy wins.
+  You are one of the player of spyfall.
 
 json_format_specification: |
   Always use this JSON template in your answer:
@@ -195,21 +175,20 @@ remember_sentence_format:
 remember_bracket_format:
   response_format: string
   guess_format: brackets
-  moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it"
+  moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it."
   describing_phase: |
-    Now it's the describing stage, players have to say something about the received word without directly saying it.
+    Now it's the describing stage, the only thing you do is describe your secret word in one sentence and without directly revealing it.
     You cannot repeat what others has said. We will start with {player}.
-    Do not say your word and do not interact with the other players yet.
-    You are not the host, please describe your word now.
   voting_phase: |
-    Now the voting start, please analyse all players text and vote for the player you think is the spy and tell the reason why you think he is the spy.
-    Do not say your word. Remember that you are not the host.
-    You should always provide your guess within brackets. It can be anywhere in your answer. For example:
+    You MUST VOTE for someone. You should always provide only your accusing name within * mark. Suppose your name is Amy, here is a template for you:
     '''
-    [<name>] I think that <name> is the spy, because of <reasons>.
+    Amy: I don't aggree with Vera. I think that *Alex* is the spy, because of...
     '''
-    Please use this template and change <name> for your guess, and <reason> for why you believe that they are the spy.
-  moderator_says_even_votes: There are even votes. The accusation does not stand.
+    Only include the name you believe is a spy in *.
+    Analyze who is the different one, try find the spy! 
+    And never reveal your secret word!!Remeber your name, you are always this player!!
+  moderator_says_even_votes: |
+    There are even votes. The accusation does not stand.
   moderator_says_wrong_guess: |
     Votes: {player_votes}.
     The most-voted player is {most_voted_player}. The accusation is incorrect.

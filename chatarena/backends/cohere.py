@@ -1,10 +1,3 @@
-# EDIT
-# This is a file that we've extensively edited. The default Cohere implementation was 
-# outdated by many versions, thus we've had to reimplement most of the functions 
-# described here. 
-#
-# You can use ctrl+f to find the other EDIT tags before the functions we've changed. 
-
 import time
 import os
 from typing import List, Union
@@ -26,9 +19,33 @@ else:
         is_cohere_available = True
 
 # Default config follows the [Cohere documentation](https://cohere-sdk.readthedocs.io/en/latest/cohere.html#cohere.client.Client.chat)
-DEFAULT_TEMPERATURE = 0.8
+DEFAULT_TEMPERATURE = 0.4
 DEFAULT_MAX_TOKENS = 1000
-DEFAULT_MODEL = "command-xlarge"
+DEFAULT_MODEL = "command-r+"
+DEFAULT_SPY = '''
+You are one of the player of spyfall.
+
+  There are multiple players in this game. 
+  At the beginning of the game, everyone will receive a word.
+  There is one spy who will receive a spy word, while others will receive a common word.
+  Spy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".
+
+  There are two stages in each round of the game.
+
+  The first stage is describing stage:
+  In this stage, the only thing you need to do is use a word or a few words to say something in turn about the word he received without directly saying the word.
+  The funniest part of the game is that since you do not know other's words, you are not sure whether you are the spy.
+  So, you can only infer who have the different based on other players description.
+
+  The second stage is the voting stage:
+  In this stage, You MUST VOTE for someone, THE ONLY THING you do is analyse all player's text and vote for the player you think is the spy and tell the reason why you think he is the spy.
+  You should always provide only your accusing name within * mark. Suppose your name is Amy, For example:
+    "Amy: I don't aggree with Nancy. I think that *Jack* is the spy, because of..."
+    Only include the name you believe is a spy in *.
+    If you are accused, fight for your self and find suspicious descrption of other players.
+
+    Analyze who is the different one, try find the spy!  And never reveal your secret word! Remeber your name, you are always this player!!
+'''
 
 
 @register_backend
@@ -38,22 +55,22 @@ class CohereAIChat(IntelligenceBackend):
     stateful = True
     type_name = "cohere-chat"
 
-    # EDIT
-    # Initializes the Cohere model with the correct API key and other important informations. 
     def __init__(
         self,
         temperature: float = DEFAULT_TEMPERATURE,
         max_tokens: int = DEFAULT_MAX_TOKENS,
         model: str = DEFAULT_MODEL,
+        preamble: str = DEFAULT_SPY,
         **kwargs,
     ):
         super().__init__(
-            temperature=temperature, max_tokens=max_tokens, model=model, **kwargs
+            temperature=temperature, max_tokens=max_tokens, model=model, preamble=preamble, **kwargs
         )
 
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.model = model
+        self.preamble = preamble
 
         assert (
             is_cohere_available
@@ -70,10 +87,6 @@ class CohereAIChat(IntelligenceBackend):
         self.session_id = None
         self.last_msg_hash = None
 
-    # EDIT
-    # This function is the generic query function for all LLMs. The chat function was 
-    # added, as well as all its parameters. We've also added the END_OF_CONVERSATION 
-    # tag to signal a chat error. 
     @retry(stop=stop_after_attempt(2), wait=wait_random_exponential(min=1, max=60))
     def _get_response(
         self, new_message: str, persona_prompt: Union[dict], verbose=False
@@ -90,6 +103,7 @@ class CohereAIChat(IntelligenceBackend):
             temperature=self.temperature,
             max_tokens=self.max_tokens,
             conversation_id=self.session_id,
+            preamble= self.preamble,
         )
 
         self.session_id = response.conversation_id  # Update the session id
@@ -97,16 +111,13 @@ class CohereAIChat(IntelligenceBackend):
             return "END_OF_CONVERSATION"
         return response.text
 
-    # EDIT
-    # This compiles all the available messages to the LLM. We've had to rework how 
-    # the messages are structred to send it to Cohere. 
     def query(
         self,
         agent_name: str,
         role_desc: str,
         context: str,
         history_messages: List[Message],
-        global_prompt: str = None,
+        premable: str = None,
         request_msg: Message = None,
         *args,
         **kwargs,
@@ -122,6 +133,7 @@ class CohereAIChat(IntelligenceBackend):
             request_msg: the request for the CohereAI
         """
         # Find the index of the last message of the last conversation
+
         new_message_start_idx = 0
         if self.last_msg_hash is not None:
             for i, message in enumerate(history_messages):
@@ -146,7 +158,7 @@ class CohereAIChat(IntelligenceBackend):
         # Concatenate all new messages into one message because the Cohere API only accepts one message
         new_message = "\n".join(new_conversations)
 
-        # persona_prompt = [{"": f"Environment:\n{global_prompt}\n\nYour role:\n{role_desc}"}]
+        #persona_prompt = [{"": f"Environment:\n{premable}\n\nYour role:\n{role_desc}"}]
 
         # print("context:", context)
         persona_prompt = context.copy()

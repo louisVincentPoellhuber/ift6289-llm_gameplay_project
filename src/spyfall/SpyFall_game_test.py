@@ -7,13 +7,13 @@ from dotenv import load_dotenv
 import random
 
 # sys.stdout = open("output_spyfall.txt", "w")
-# Loading dotenv
-load_dotenv()
 
 # Configuring path from the library
 CHATARENA_PATH = os.getenv("CHATARENA_PATH")
 sys.path.append(CHATARENA_PATH)
 
+# Loading dotenv
+load_dotenv()
 
 from chatarena.arena import Arena
 from chatarena.agent import Player
@@ -39,9 +39,9 @@ with open(PROMPT_CONFIG_FILE) as file:
 # prompt_mode = "remember_json"
 prompt_modes = [
     # "baseline",
-    "remember_json_guessing_format",
+    # "remember_json_guessing_format",
     # "remember_sentence_format",
-    # "remember_bracket_format"
+    "remember_bracket_format"
 ]
 repetitions = 1
 for prompt_mode in prompt_modes:
@@ -66,7 +66,7 @@ for prompt_mode in prompt_modes:
         players_list = [
             Player(
                 name=players[i],
-                role_desc=role_description + format_specification,
+                role_desc="Your name is " + players[i]+ "," +role_description + format_specification,
                 backend=backend,
             )
             for i in range(len(players[:number_of_players]))
@@ -84,5 +84,5 @@ for prompt_mode in prompt_modes:
         postfix = f"{prompt_mode}_{strftime('%Y_%m_%d_%H_%M_%S')}"
         # Saving history
         arena.save_chat(
-            f"src/spyfall/chat_history/11_04_24/spyfall_{prompt_mode}_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
+            f"src/spyfall/chat_history_BY/spyfall_{prompt_mode}_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
         )

@@ -1,15 +1,3 @@
-# NEW
-# This is a brand-new Environment that our team has implemented. It holds all the 
-# game logic for the game Spyfall.
-# 
-# A typical game will start with the Arena running the __init__ function. Then, it
-# will run the step function until an ending state is reached. 
-#
-# Ask-guess iterates through two phases between steps: the "give clues" phase and 
-# the "accuse" phase. In the step function, you can find a large IF statement that 
-# switches the step logic depending on each phase. Other functions simply support
-# the main game logic. 
-
 import yaml
 import random
 import re
@@ -124,7 +112,7 @@ class SpyFall(Environment):
 
         self.message_pool.reset()
 
-        self._moderator_speak(f"Host: The game now starts.")
+        self._moderator_speak(f"The game now starts.")
         # Moderator gives word to villagers
         self._moderator_speak(
             self._prompts[self._prompt_config_mode]["moderator_gives_word"]
@@ -279,6 +267,9 @@ class SpyFall(Environment):
         elif response_format == "string":
             word = None
             arguments = action
+            # print("##################")
+            # print(action)
+            # print("##################")
         return word, arguments
 
     def step(self, player_name: str, action: str) -> TimeStep:
@@ -302,7 +293,6 @@ class SpyFall(Environment):
         if self._current_phase == "give clues":
 
             ## PARSE RESPONSE see askguess
-            # print("Content action:", action)
             json_list = []
             if self._prompts[self._prompt_config_mode]["response_format"] == "json":
                 json_list = extract_jsons_spyfall(action)
@@ -345,6 +335,8 @@ class SpyFall(Environment):
                 turn=self._current_turn,
             )
             self.message_pool.append_message(message)
+
+            print()
 
             # Update the counters
             self._current_turn += 1
@@ -411,8 +403,13 @@ class SpyFall(Environment):
                 turn=self._current_turn,
             )
 
-            self.message_pool.append_message(message)
-            vote = self._text2vote(arguments)
+
+            if self._prompts[self._prompt_config_mode]["response_format"] == "string":
+                self.message_pool.append_message(message)
+                pattern = r'\*([^*]+)\*'
+                vote = str(re.findall(pattern, arguments))
+                vote = self._text2vote(vote)
+
 
             if vote in self.player_names:
                 self._players_votes[vote] += 1

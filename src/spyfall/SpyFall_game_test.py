@@ -33,12 +33,6 @@ with open(PROMPT_CONFIG_FILE) as file:
 number_of_players = 6
 # Starting cohere backend
 client = cohere.Client(os.getenv("COHEREAI_API_KEY"))
-backend = CohereAIChat(
-    temperature=prompts["temperature"],
-    max_tokens=prompts["max_tokens"],
-    model=prompts["model_name"],
-    preamble=prompts["preamble"],
-)
 
 # prompt_mode = "remember_json"
 prompt_modes = [
@@ -49,6 +43,14 @@ prompt_modes = [
 ]
 repetitions = 1
 for prompt_mode in prompt_modes:
+
+    backend = CohereAIChat(
+        temperature=prompts[prompt_mode]["temperature"],
+        max_tokens=prompts[prompt_mode]["max_tokens"],
+        model=prompts[prompt_mode]["model_name"],
+        preamble=prompts[prompt_mode]["preamble"],
+    )
+
     for _ in range(repetitions):
         print("\n\n", "-----------------------------------")
         print(f"PROMPT MODE:", prompt_mode, "\n\n")

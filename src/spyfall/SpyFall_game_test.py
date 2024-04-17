@@ -25,16 +25,20 @@ file_path = os.path.abspath(__file__)
 dir_path = os.path.dirname(file_path)
 PROMPT_CONFIG_FILE = dir_path + "/spyfall_prompt_config.yaml"
 
-# Starting cohere backend
-client = cohere.Client(os.getenv("COHEREAI_API_KEY"))
-backend = CohereAIChat()
-
-# Name of the players
-number_of_players = 6
-
 # Opening configurations
 with open(PROMPT_CONFIG_FILE) as file:
     prompts = yaml.safe_load(file)
+
+# Name of the players
+number_of_players = 6
+# Starting cohere backend
+client = cohere.Client(os.getenv("COHEREAI_API_KEY"))
+backend = CohereAIChat(
+    temperature=prompts["temperature"],
+    max_tokens=prompts["max_tokens"],
+    model=prompts["model_name"],
+    preamble=prompts["preamble"],
+)
 
 # prompt_mode = "remember_json"
 prompt_modes = [
@@ -66,7 +70,11 @@ for prompt_mode in prompt_modes:
         players_list = [
             Player(
                 name=players[i],
-                role_desc="Your name is " + players[i]+ "," +role_description + format_specification,
+                role_desc="Your name is "
+                + players[i]
+                + ","
+                + role_description
+                + format_specification,
                 backend=backend,
             )
             for i in range(len(players[:number_of_players]))

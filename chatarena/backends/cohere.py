@@ -22,7 +22,7 @@ else:
 DEFAULT_TEMPERATURE = 0.4
 DEFAULT_MAX_TOKENS = 1000
 DEFAULT_MODEL = "command-r+"
-DEFAULT_SPY = '''
+DEFAULT_SPY = """
 You are one of the player of spyfall.
 
   There are multiple players in this game. 
@@ -45,7 +45,7 @@ You are one of the player of spyfall.
     If you are accused, fight for your self and find suspicious descrption of other players.
 
     Analyze who is the different one, try find the spy!  And never reveal your secret word! Remeber your name, you are always this player!!
-'''
+"""
 
 
 @register_backend
@@ -64,7 +64,11 @@ class CohereAIChat(IntelligenceBackend):
         **kwargs,
     ):
         super().__init__(
-            temperature=temperature, max_tokens=max_tokens, model=model, preamble=preamble, **kwargs
+            temperature=temperature,
+            max_tokens=max_tokens,
+            model=model,
+            preamble=preamble,
+            **kwargs,
         )
 
         self.temperature = temperature
@@ -103,7 +107,7 @@ class CohereAIChat(IntelligenceBackend):
             temperature=self.temperature,
             max_tokens=self.max_tokens,
             conversation_id=self.session_id,
-            preamble= self.preamble,
+            preamble=self.preamble,
         )
 
         self.session_id = response.conversation_id  # Update the session id
@@ -158,7 +162,7 @@ class CohereAIChat(IntelligenceBackend):
         # Concatenate all new messages into one message because the Cohere API only accepts one message
         new_message = "\n".join(new_conversations)
 
-        #persona_prompt = [{"": f"Environment:\n{premable}\n\nYour role:\n{role_desc}"}]
+        # persona_prompt = [{"": f"Environment:\n{premable}\n\nYour role:\n{role_desc}"}]
 
         # print("context:", context)
         persona_prompt = context.copy()

@@ -1,11 +1,11 @@
 # NEW
 # This is a brand-new Environment that our team has implemented. It holds all the 
-# game logic for the game Taboo.
+# game logic for the game Ask-Guess.
 # 
 # A typical game will start with the Arena running the __init__ function. Then, it
 # will run the step function until an ending state is reached. 
 #
-# Taboo iterates through two phases between steps: the "give clues" phase and 
+# Ask-guess iterates through two phases between steps: the "give clues" phase and 
 # the "guess" phase. In the step function, you can find a large IF statement that 
 # switches the step logic depending on each phase. Other functions simply support
 # the main game logic. 
@@ -15,12 +15,12 @@ import string
 from unidecode import unidecode
 import re
 from typing import Dict, List, Union
+import yaml
 
 from ..agent import SIGNAL_END_OF_CONVERSATION
 from ..message import Message, MessagePool
 from .base import Environment, TimeStep, register_env
 from ..utils import extract_jsons
-
 
 
 DEFAULT_TABOO_LIST = {
@@ -47,96 +47,20 @@ DEFAULT_TABOO_LIST = {
     ]
 }
 
-speaker_format_specification = """
-Your output should be format in a json with the following schema:
-```
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "properties": {
-    "clue": {
-      "description": "a clue hinting at the secret word that you are going to give the guesser",
-      "type": "string"
-    }
-  },
-  "required": ["clue"]
-}
-```
-
-For example:
-```
-{\n  "clue": "The secret word is a hairy animal." \n}
-
-```
-"""
-speaker_role_description = """
-You are the speaker! You will be given a secret word and some restricted words. You you must make your game partner 
-guess your secret word correctly, without saying the word. You will need to give them precise and 
-concise clues hinting at your secret word, excluding the secret word. Most importantly, you can not mention the given restricted terms in your clue.
-
-You need to make your partner guess your secret word in as few rounds as possible.
-
-You should never:
-1. Say the secret word
-2. Repeat a clue
-3. Include restricted words in your description
-
-"""
-
-guesser_role_description = """
-You are the guesser! You are going to guess a secret word using clues given to you by your game partner. 
-You need to use these clues to guess the secret word. You also need to provide 
-arguments for each of your guesses, to help your partner create better clues. 
-
-You need to make your partner guess your secret word in as few rounds as possible.
-
-You should never:
-1. Repeat a guess
-"""
-
-
-guesser_format_specification = """
-Your output should be format in a json with the following schema:
-```
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "properties": {
-    "guess": {
-      "description": "a single word, your guess given the clues",
-      "type": "string"
-    }, 
-    "arguments": {
-      "description": "the reasoning behind your guess, why you chose this word",
-      "type": "string"
-    }
-  },
-  "required": ["guess", "arguments"]
-}
-```
-
-For example:
-```
-{\n  "guess": "cat", "arguments": "Since the clue is that the secret word is a hairy animal, my guess is 'cat'." \n}
-
-```
-"""
-
-
 @register_env
 class Taboo(Environment):
-    type_name = "ask-guess"
+    type_name = "taboo"
 
     def __init__(
         self,
+        prompt_config_mode: str,
+        prompt_config_file: str,
         player_names: List[str],
         taboo: Dict[str, str] = None,
         **kwargs,
     ):
-        super().__init__(player_names=player_names, taboo=taboo, **kwargs)
+        super().__init__(player_names=player_names, taboo = taboo, **kwargs)
 
-        # if word_list and taboo is None:
-        #     word_list = DEFAULT_WORD_LIST
         if taboo is None:
             taboo = DEFAULT_TABOO_LIST
         self.taboo = taboo
@@ -150,13 +74,22 @@ class Taboo(Environment):
         self.guesser = None
         self.speaker = None
 
-        self.tawords = None
-
         # Game states
         self._current_turn = 0
         #self._next_player_idx = 0
         self._current_phase = "give clues"  # "give clues", "guess"
         self._initialized = False
+        self._correct_guess = False
+        self._ending_condition = None
+        self._is_terminal = False
+
+        self._prompt_config_mode = prompt_config_mode
+        self._prompt_config_prompt_config_file = prompt_config_file
+
+        # Reading prompt configs
+        with open(self._prompt_config_prompt_config_file, "r") as file:
+            self._prompts = yaml.safe_load(file)
+
 
         self.reset()  # To initialize the game (select a random word and roles)
 
@@ -170,7 +103,7 @@ class Taboo(Environment):
     def reset(self):
         """Sample a random word and roles."""
         self.word = random.choice(list(self.taboo.keys()))
-        self.tawords = self.taboo[self.word]
+        self.tawooords = self.taboo[self.word]
 
         self.guesser = random.choice(self.player_names)
         self.speaker = [name for name in self.player_names if name != self.guesser][0]
@@ -181,15 +114,24 @@ class Taboo(Environment):
 
         self.message_pool.reset()
 
-        self._moderator_speak(f"Now the game starts!")
-        self._moderator_speak(speaker_role_description + speaker_format_specification +
-            f"The secret word is: {self.word}, and the restricted words are: {self.tawords}",
+        self._moderator_speak(
+            "You are" + self.speaker+ ", " + self._prompts[self._prompt_config_mode]["speaker_role"],
             visible_to=self.speaker,
         )
-        self._moderator_speak(guesser_role_description+guesser_format_specification, visible_to=self.guesser)
         self._moderator_speak(
-            "Now the speaker now gives one clue (but don't give away the secret word). But, in the description, you can not include these restricted words."
-            f"You cannot repeat a clue you've already given."
+            "You are" + self.guesser + ", "+ self._prompts[self._prompt_config_mode]["guesser_role"],
+            visible_to=self.guesser,
+        )
+        self._moderator_speak(f"Now the game starts!")
+        self._moderator_speak(
+            self._prompts[self._prompt_config_mode]["secret_word_message"]
+            .format(word=self.word, tawooords=', '.join(self.tawooords))
+            .replace(r"{{", "{")
+            .replace(r"}}", "}"),
+            visible_to=self.speaker,
+        )
+        self._moderator_speak(
+            self._prompts[self._prompt_config_mode]["initial_clues_phase"]
         )
         self._current_turn = 1
 
@@ -284,6 +226,28 @@ class Taboo(Environment):
             SIGNAL_END_OF_CONVERSATION
         ):
             return True
+    
+    def get_disposition(self) -> Dict:
+        disposition = {}
+        disposition["secret_word"] = self.word
+        disposition["nb_players"] = len(self.player_names)
+        disposition["roles"] = {"speaker":[self.speaker], "guesser":[self.guesser]} # has to be lists!
+
+        return disposition
+
+    def get_metrics(self) -> Dict:
+        metrics = {}
+
+        metrics["nb_turns"] = self._current_turn
+
+        if self._correct_guess:
+            metrics["end_condition"] = "ST" # Successful trial
+        elif self._ending_condition != None:
+            metrics["end_condition"] = self._ending_condition # Ending error, Chat error or Answer Mentioned Error
+        else:
+            metrics["end_condition"] = "RLE" # Round Limit Error (reaches the number of max steps)
+
+        return metrics
 
     def step(self, player_name: str, action: str) -> TimeStep:
         """
@@ -301,43 +265,69 @@ class Taboo(Environment):
             player_name == self.get_next_player()
         ), f"Wrong player! It is {self.get_next_player()} turn."
         if self._current_phase == "give clues":
-            json_list = extract_jsons(action)
-            if len(json_list) != 1:
-                raise ValueError(f"Player output {action} is not a valid json.")
 
-            clue = json_list[0].get("clue", None)
+            # Switch formats
+            if (self._prompt_config_mode=="bracket_format") | (self._prompt_config_mode=="best"):
+                clue, timestep = self.get_bracket_response(action)
+            elif self._prompt_config_mode=="sentence_format":
+                clue, timestep = self.get_sentence_response(action)
+            else:
+                clue, timestep = self.get_json_response(action)
+
+            if timestep != None:
+                final_output = f"[Final Message] {action}"
+
+                self._moderator_speak(final_output)
+                return timestep
+            
+            if self.word in clue: 
+                self._ending_condition = "AME"
+                self._is_terminal = True
+                print(f"The answer was mentioned in the clue.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+            
+            for taboos in self.tawooords:
+                if taboos in clue:
+                    self._ending_condition = "RME"
+                    self._is_terminal = True
+                    print(f"Restricted word was mentioned in the clue.")
+                    timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+
             message = Message(
                 agent_name=player_name, content=clue, turn=self._current_turn
             )
-            self.message_pool.append_message(message)
 
             # Update the counters
             self._current_turn += 1
-
-            #if self._next_player_idx < len(self.player_names) - 1:
-            #    self._next_player_idx = 0
-            #    self._current_phase = "guess"
-            #    self._moderator_speak(
-            #        "Now, using the clues given so far, try to guess the secret word. You may not guess a word you've previously guessed.",
-            #        visible_to=self.guesser,
-            #    )
-            #else:
-            #    self._next_player_idx += 1
-               
             self._current_phase = "guess"
 
+            if (self._prompt_config_mode == "format_reminder"):
+                self._moderator_speak(
+                    self._prompts[self._prompt_config_mode]["guesser_format"],
+                    visible_to=self.guesser
+                )
+            
+            self.message_pool.append_message(message)
             timestep = TimeStep(
                 observation=self.get_observation(),
                 reward=self.get_zero_rewards(),
                 terminal=False,
             )  # Return all the messages
         elif self._current_phase == "guess":
-            json_list = extract_jsons(action)
-            if len(json_list) != 1:
-                raise ValueError(f"Player output {action} is not a valid json.")
 
-            guess = json_list[0].get("guess", None)
-            arguments = json_list[0].get("arguments", None)
+            # Switch formats
+            if (self._prompt_config_mode=="bracket_format") | (self._prompt_config_mode=="best"):
+                guess, arguments, timestep = self.get_bracket_response(action)
+            elif self._prompt_config_mode=="sentence_format":
+                guess, arguments, timestep = self.get_sentence_response(action)
+            else:
+                guess, arguments, timestep = self.get_json_response(action)
+
+            if timestep != None:
+                final_output = f"[Final Message] {action}"
+
+                self._moderator_speak(final_output)
+                return timestep
 
             message = Message(
                 agent_name=player_name,
@@ -346,29 +336,170 @@ class Taboo(Environment):
             )
             self.message_pool.append_message(message)
 
-            is_terminal=False
             if self._is_true_word(guess):
                 self._moderator_speak(
-                    f"{player_name} guessed the word correctly! The secret word is {self.word}. "
-                    f"You both won!"
+                    self._prompts[self._prompt_config_mode]["win_message"]
+                    .format(player_name=self.guesser, word=self.word)
+                    .replace(r"{{", "{")
+                    .replace(r"}}", "}"),
                 )
                 rewards = self.get_rewards(correct_guess=True)
-                is_terminal = True
+                self._correct_guess = True
+                self._is_terminal = True
             else:
                 self._moderator_speak(
-                    f"{player_name} guessed the word wrong. Now the speaker will give another clue! Don't forget to answer in the correct JSON format. "
+                    self._prompts[self._prompt_config_mode]["wrong_guess_message"]
+                    .format(player_name=self.guesser)
+                    .replace(r"{{", "{")
+                    .replace(r"}}", "}"),
                 )
                 rewards = self.get_rewards(correct_guess=False)
 
             self._current_phase = "give clues"
-            timestep = TimeStep(
-                observation=self.get_observation(), reward=rewards, terminal=is_terminal
-            )
+            
+            if (self._prompt_config_mode == "format_reminder") & ~(self._is_terminal):
+                self._moderator_speak(
+                    self._prompts[self._prompt_config_mode]["speaker_format"],
+                    visible_to=self.speaker
+                )
+            elif (self._prompt_config_mode == "word_reminder") & ~(self._is_terminal):
+                self._moderator_speak(
+                    self._prompts[self._prompt_config_mode]["secret_word_reminder"]
+                    .format(word=self.word)
+                    .replace(r"{{", "{")
+                    .replace(r"}}", "}"),
+                    visible_to=self.speaker
+                )
+
+            timestep = TimeStep(observation=self.get_observation(), reward=rewards, terminal=self._is_terminal)
         else:
             raise ValueError(f"Unknown phase: {self._current_phase}")
-
-        # Check if the player signals the end of the conversation
+    
         if self.is_terminal():
             timestep.terminal = True
 
         return timestep
+    
+    def get_json_response(self, action):
+        if self._current_phase == "give clues":
+
+            json_list = extract_jsons(action)
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                clue = None
+            
+            elif len(json_list) != 1:
+                self._ending_condition = "EE"
+                self._is_terminal = True
+                print(f"Player output {action} is not a valid json.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                clue = None
+            else:
+                timestep = None
+                clue = json_list[0].get("clue", None)
+
+            return clue, timestep
+        
+        elif self._current_phase == "guess":
+
+            json_list = extract_jsons(action)
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                guess = None
+                arguments = None
+                
+            elif len(json_list) != 1:
+                self._ending_condition = "EE"
+                self._is_terminal = True
+                print(f"Player output {action} is not a valid json.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                guess = None
+                arguments = None
+            else:
+                guess = json_list[0].get("guess", None)
+                arguments = json_list[0].get("arguments", None)
+                timestep = None
+
+            return guess, arguments, timestep
+
+    def get_bracket_response(self, action):
+        
+        if self._current_phase == "give clues":
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                clue = None
+            else:
+                clue = action
+                timestep = None
+            
+            return clue, timestep
+            
+        elif self._current_phase == "guess":
+            pattern = r'\[(.*?)\]'
+    
+            match = re.search(pattern, action)
+
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                clue = None
+            elif match:
+                guess = match.group(1)
+                arguments = action
+                timestep = None
+            else:
+                self._ending_condition = "EE"
+                self._is_terminal = True
+                print(f"Player output {action} does not contain brackets.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                guess = None
+                arguments = None
+
+            
+            return guess, arguments, timestep
+        
+    def get_sentence_response(self, action):
+        MAX_NB_WORDS = 2 # How many words does the format allow. By default 2, as none of our secret words are longer than 2. 
+        if self._current_phase == "give clues":
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                clue = None
+            else:
+                clue = action
+                timestep = None
+            
+            return clue, timestep
+                
+        elif self._current_phase == "guess":
+            sentences = action.split(".")
+            guess = sentences[0]
+            arguments = action
+            timestep = None
+
+            if "END_OF_CONVERSATION" in action:
+                self._ending_condition = "CE"
+                self._is_terminal = True
+                print(f"There was a chat error.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+            elif guess.count(" ")>MAX_NB_WORDS:
+                self._ending_condition = "EE"
+                self._is_terminal = True
+                print(f"Player output {action} is not in the correct format.")
+                timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=self._is_terminal)
+                
+            return guess, arguments, timestep
+

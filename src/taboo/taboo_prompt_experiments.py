@@ -12,7 +12,7 @@ from time import strftime
 
 from chatarena.agent import Player
 from chatarena.backends import CohereAIChat, OpenAIChat, Claude
-from chatarena.environments.askguess import AskGuess
+from chatarena.environments.taboo import Taboo
 
 import cohere
 import openai
@@ -22,14 +22,14 @@ import openai
 
 role_description = """
 You are going to play in a two-player word guessing game. There are two roles in the game:
-The speaker, who is given a secret word, and the guesser, who must guess the secret word. The 
-speaker will give the guesser clues relating to the secret word. Together, the two must guess 
+The speaker, who is given a secret word and some restricted words, and the guesser, who must guess the secret word. The 
+speaker will give the guesser clues describing the secret word, but without mentioning the given restricted terms. Together, the two must guess 
 the word correctly in as few rounds as possible. 
 """
 
 file_path = os.path.abspath(__file__)
 dir_path = os.path.dirname(file_path)
-PROMPT_CONFIG_FILE = os.path.join(dir_path, "askguess_prompt_config.yaml")
+PROMPT_CONFIG_FILE = os.path.join(dir_path, "taboo_prompt_config.yaml")
 
 with open(PROMPT_CONFIG_FILE) as file:
     prompts = yaml.safe_load(file)
@@ -45,8 +45,8 @@ toto = Player(name="Toto",
 
 from chatarena.arena import Arena
 
-with open(r"C:\Users\Louis\Documents\University\Masters\H24 - Deep NLP\ift6289-llm_gameplay_project\datasets\askguess.json", "r") as fp:
-    word_list = json.load(fp)["wordict"]
+with open(r"/Users/yibeel/Desktop/clone/ift6289-llm_gameplay_project/datasets/taboo/web.json", "r") as fp:
+    taboo = json.load(fp)
 
 
 NB_EXPERIMENTS = 10
@@ -61,9 +61,9 @@ for prompt_mode in PROMPT_MODES:
         print(f"Experiment {i}.")
 
         # ====== Baseline =======
-        env = AskGuess(
+        env = Taboo(
             player_names = ["Paya", "Toto"], 
-            word_list=word_list, 
+            taboo = taboo, 
             prompt_config_file=PROMPT_CONFIG_FILE,
             prompt_config_mode=prompt_mode,
             )
@@ -72,4 +72,4 @@ for prompt_mode in PROMPT_MODES:
         arena.launch_cli(interactive=False, max_steps=MAX_STEPS)
 
         # Saving history
-        arena.save_chat(f"src/askguess/chat_history/{prompt_mode}/askguess_{strftime('%Y_%m_%d_%H_%M_%S')}.json")
+        arena.save_chat(f"src/taboo/chat_history/{prompt_mode}/taboo_{strftime('%Y_%m_%d_%H_%M_%S')}.json")

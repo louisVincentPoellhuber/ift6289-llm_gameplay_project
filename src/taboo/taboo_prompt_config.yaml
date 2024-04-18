@@ -1,0 +1,476 @@
+
+## Prompt designs --------------------------------------
+## Each prompt must follow this template:
+
+## name_of_the_prompt:
+##   moderator_gives_word: ...{word}...
+##   describing_phase: ...{player}...
+##   voting_phase:
+##   moderator_says_even_votes:
+##   moderator_says_wrong_guess: ...{player_votes}...{most_voted_player}
+##   moderator_says_spy_wins: 
+##   moderator_says_villagers_win: ...{spy_name}...
+
+
+template:
+  speaker_role: |
+    You are the speaker! You will be given a secret word and some restricted words. You must make your game partner 
+    guess your secret word correctly, without saying the word. You will need to give them precise and 
+    concise clues hinting at your secret word, excluding the secret word. Most importantly, you can not mention the given restricted terms in your clue.
+
+    You need to make your partner guess your secret word in as few rounds as possible.
+
+    You should never:
+    1. Say the secret word
+    2. Repeat a clue
+    3. Include restricted words in your description
+  guesser_role: |
+    You are the guesser! You are going to guess a secret word using clues given to you by your game partner. 
+    You need to use these clues to guess the secret word. You also need to provide 
+    arguments for each of your guesses, to help your partner create better clues. 
+
+    You need to make your partner guess your secret word in as few rounds as possible.
+
+    You should never:
+    1. Repeat a guess
+  secret_word_message: |
+    The secret word is: {word}, and the restricted words are: {tawooords}.
+  initial_clues_phase: >
+    Now the speaker now gives one clue (but don't give away the secret word and your restricted words). But, in the description, you can not include these restricted words. You cannot repeat a clue you've already given.
+  win_message: |
+    {player_name} guessed the word correctly! The secret word is {word}. You both won!
+  wrong_guess_message: |
+    {player_name} guessed the word wrong. Now the speaker will give another clue.
+  
+# Model: Cohere
+# Format: JSON
+# Reminder: Indirect
+# Word reminder: No
+baseline:
+  speaker_role: |
+    You are the speaker! You will be given a secret word and some restricted words. You must make your game partner 
+    guess your secret word correctly, without saying the word. You will need to give them precise and 
+    concise clues hinting at your secret word, excluding the secret word. Most importantly, you can not mention the given restricted terms in your clue.
+
+    You need to make your partner guess your secret word in as few rounds as possible.
+
+    You should never:
+    1. Say the secret word
+    2. Repeat a clue
+    3. Include restricted words in your description
+
+    Your output should be formatted in a json with the following schema:
+    ```
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "clue": {
+          "description": "a clue hinting at the secret word that you are going to give the guesser",
+          "type": "string"
+        }
+      },
+      "required": ["clue"]
+    }
+    ```
+
+    For example:
+    ```
+    {\n  "clue": "The secret word is a hairy animal." \n}
+
+    ```
+  guesser_role: |
+    You are the guesser! You are going to guess a secret word using clues given to you by your game partner. 
+    You need to use these clues to guess the secret word. You also need to provide arguments for each of your guesses, 
+    to help your partner create better clues. 
+
+    You and your partner need to guess the secret word in as few rounds as possible.
+
+    You should never repeat a guess.
+
+    Your output should be formatted in a json with the following schema:
+    ```
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "guess": {
+          "description": "a single word, your guess given the clues",
+          "type": "string"
+        }, 
+        "arguments": {
+          "description": "the reasoning behind your guess, why you chose this word",
+          "type": "string"
+        }
+      },
+      "required": ["guess", "arguments"]
+    }
+    ```
+
+    For example:
+    ```
+    {\n  "guess": "cat", "arguments": "Since the clue is that the secret word is a hairy animal, my guess is 'cat'." \n}
+
+    ```
+  secret_word_message: |
+    The secret word is: {word}, and the restricted words are: {tawooords}.
+  initial_clues_phase: >
+    Now the speaker now gives one clue (but don't give away the secret word and the restricted word). You cannot repeat a clue you've already given. 
+    Do not forget to provide your response in the given JSON format.  
+  win_message: |
+    {player_name} guessed the word correctly! The secret word is {word}. You both won!
+  wrong_guess_message: |
+    {player_name} guessed the word wrong. Now the speaker will give another clue.
+    Do not forget to provide your response in the given JSON format. 
+  
+
+   
+# Model: Cohere
+# Format: Brackets [ ]
+# Reminder: Indirect
+# Word reminder: No
+bracket_format:
+  speaker_role: |
+    You are the speaker! You will be given a secret word and some restricted words. You must make your game partner 
+    guess your secret word correctly, without saying the word. You will need to give them precise and 
+    concise clues hinting at your secret word, excluding the secret word. Most importantly, you can not mention the given restricted terms in your clue.
+
+    You need to make your partner guess your secret word in as few rounds as possible.
+
+    You should never:
+    1. Say the secret word
+    2. Repeat a clue
+    3. Include restricted words in your description
+
+  guesser_role: |
+    You are the guesser! You are going to guess a secret word using clues given to you by your game partner. 
+    You need to use these clues to guess the secret word. You also need to provide arguments for each of your guesses, 
+    to help your partner create better clues. 
+
+    You and your partner need to guess the secret word in as few rounds as possible.
+
+    You should never repeat a guess.
+
+    You should always provide your guess within []. It can be anywhere in your answer. For example:
+    '''
+    [orange] I think the secret word is orange, given the clues.
+    '''
+    Here's another example:
+    '''
+    When I think of an animal with fur, I think of a [cat].
+    '''
+    
+  secret_word_message: |
+    The secret word is: {word}, and the restricted words are: {tawooords}.
+  initial_clues_phase: >
+    Now the speaker now gives one clue (but don't give away the secret word and the restricted word). You cannot repeat a clue you've already given. 
+    Guesser, do not forget to provide your guess in the correct format.   
+  win_message: |
+    {player_name} guessed the word correctly! The secret word is {word}. You both won!
+  wrong_guess_message: |
+    {player_name} guessed the word wrong. Now the speaker will give another clue.
+    Guesser, do not forget to provide your guess in the correct * format.
+
+
+# Model: Cohere
+# Format: Sentence Format
+# Reminder: Indirect
+# Word reminder: No
+sentence_format:
+  speaker_role: |
+    You are the speaker! You will be given a secret word and some restricted words. You  must make your game partner 
+    guess your secret word correctly, without saying the word. You will need to give them precise and 
+    concise clues hinting at your secret word, excluding the secret word. Most importantly, you can not mention the given restricted terms in your clue.
+
+    You need to make your partner guess your secret word in as few rounds as possible.
+
+    You should never:
+    1. Say the secret word
+    2. Repeat a clue
+    3. Include restricted words in your description
+
+  guesser_role: |
+    You are the guesser! You are going to guess a secret word using clues given to you by your game partner. 
+    You need to use these clues to guess the secret word. You also need to provide arguments for each of your guesses, 
+    to help your partner create better clues. 
+
+    You and your partner need to guess the secret word in as few rounds as possible.
+
+    You should never repeat a guess.
+
+    You should always provide your guess as the first word of your response, followed by a dot. 
+    You may repeat the guess throughout your sentence.
+    '''
+    Orange. I think the secret word is orange, given the clues.
+    '''
+    Here's another example:
+    '''
+    Cat. When I think of an animal with fur, I think of a cat.
+    '''
+    
+  secret_word_message: |
+    The secret word is: {word}, and the restricted words are: {tawooords}.
+  initial_clues_phase: >
+    Now the speaker now gives one clue (but don't give away the secret word and restricted words). You cannot repeat a clue you've already given. 
+    Guesser, do not forget to provide your guess in the correct format.
+  win_message: |
+    {player_name} guessed the word correctly! The secret word is {word}. You both won!
+  wrong_guess_message: |
+    {player_name} guessed the word wrong. Now the speaker will give another clue. 
+    Guesser, do not forget to provide your guess in the correct format.
+
+
+# Model: Cohere
+# Format: JSON
+# Reminder: Direct
+# Word reminder: No
+format_reminder:
+  speaker_role: |
+    You are the speaker! You will be given a secret word and some restricted words. You must make your game partner 
+    guess your secret word correctly, without saying the word. You will need to give them precise and 
+    concise clues hinting at your secret word, excluding the secret word. Most importantly, you can not mention the given restricted terms in your clue.
+
+    You need to make your partner guess your secret word in as few rounds as possible.
+
+    You should never:
+    1. Say the secret word
+    2. Repeat a clue
+    3. Include restricted words in your description.
+    Your output should be formatted in a json with the following schema:
+    ```
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "clue": {
+          "description": "a clue hinting at the secret word that you are going to give the guesser",
+          "type": "string"
+        }
+      },
+      "required": ["clue"]
+    }
+    ```
+
+    For example:
+    ```
+    {\n  "clue": "The secret word is a hairy animal." \n}
+
+    ```
+  speaker_format: |
+    Your output should be formatted in a json with the following schema:
+      ```
+      {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "clue": {
+            "description": "a clue hinting at the secret word that you are going to give the guesser",
+            "type": "string"
+          }
+        },
+        "required": ["clue"]
+      }
+      ```
+
+      For example:
+      ```
+      {\n  "clue": "The secret word is a hairy animal." \n}
+
+      ```
+  guesser_role: |
+    You are the guesser! You are going to guess a secret word using clues given to you by your game partner. 
+    You need to use these clues to guess the secret word. You also need to provide arguments for each of your guesses, 
+    to help your partner create better clues. 
+
+    You and your partner need to guess the secret word in as few rounds as possible.
+
+    You should never repeat a guess.
+
+    Your output should be formatted in a json with the following schema:
+    ```
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "guess": {
+          "description": "a single word, your guess given the clues",
+          "type": "string"
+        }, 
+        "arguments": {
+          "description": "the reasoning behind your guess, why you chose this word",
+          "type": "string"
+        }
+      },
+      "required": ["guess", "arguments"]
+    }
+    ```
+
+    For example:
+    ```
+    {\n  "guess": "cat", "arguments": "Since the clue is that the secret word is a hairy animal, my guess is 'cat'." \n}
+
+    ```
+  guesser_format: |
+    Your output should be formatted in a json with the following schema:
+    ```
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "guess": {
+          "description": "a single word, your guess given the clues",
+          "type": "string"
+        }, 
+        "arguments": {
+          "description": "the reasoning behind your guess, why you chose this word",
+          "type": "string"
+        }
+      },
+      "required": ["guess", "arguments"]
+    }
+    ```
+
+    For example:
+    ```
+    {\n  "guess": "cat", "arguments": "Since the clue is that the secret word is a hairy animal, my guess is 'cat'." \n}
+
+    ```
+  secret_word_message: |
+    The secret word is: {word}, and the restricted words are: {tawooords}.
+  initial_clues_phase: >
+    Now the speaker now gives one clue (but don't give away the secret word and your restricted words). You cannot repeat a clue you've already given. 
+  win_message: |
+    {player_name} guessed the word correctly! The secret word is {word}. You both won!
+  wrong_guess_message: |
+    {player_name} guessed the word wrong. Now the speaker will give another clue.
+
+   
+# Model: Cohere
+# Format: JSON
+# Reminder: Indirect
+# Word reminder: Yes
+word_reminder:
+  speaker_role: |
+    You are the speaker! You will be given a secret word and some restricted words. You you must make your game partner 
+    guess your secret word correctly, without saying the word. You will need to give them precise and 
+    concise clues hinting at your secret word, excluding the secret word. Most importantly, you can not mention the given restricted terms in your clue.
+
+    You need to make your partner guess your secret word in as few rounds as possible.
+
+    You should never:
+    1. Say the secret word
+    2. Repeat a clue
+    3. Include restricted words in your description
+
+    Your output should be formatted in a json with the following schema:
+    ```
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "clue": {
+          "description": "a clue hinting at the secret word that you are going to give the guesser",
+          "type": "string"
+        }
+      },
+      "required": ["clue"]
+    }
+    ```
+
+    For example:
+    ```
+    {\n  "clue": "The secret word is a hairy animal." \n}
+
+    ```
+  guesser_role: |
+    You are the guesser! You are going to guess a secret word using clues given to you by your game partner. 
+    You need to use these clues to guess the secret word. You also need to provide arguments for each of your guesses, 
+    to help your partner create better clues. 
+
+    You and your partner need to guess the secret word in as few rounds as possible.
+
+    You should never repeat a guess.
+
+    Your output should be formatted in a json with the following schema:
+    ```
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "guess": {
+          "description": "a single word, your guess given the clues",
+          "type": "string"
+        }, 
+        "arguments": {
+          "description": "the reasoning behind your guess, why you chose this word",
+          "type": "string"
+        }
+      },
+      "required": ["guess", "arguments"]
+    }
+    ```
+
+    For example:
+    ```
+    {\n  "guess": "cat", "arguments": "Since the clue is that the secret word is a hairy animal, my guess is 'cat'." \n}
+
+    ```
+  secret_word_message: |
+    The secret word is: {word}, and the restricted words are: {tawooords}.
+  secret_word_reminder: |
+    Remember that the secret word is: {word}. Do not say it.
+  initial_clues_phase: >
+    Now the speaker now gives one clue (but don't give away the secret word and your restricted words). You cannot repeat a clue you've already given. 
+    Do not forget to provide your response in the given JSON format.  
+  win_message: |
+    {player_name} guessed the word correctly! The secret word is {word}. You both won!
+  wrong_guess_message: |
+    {player_name} guessed the word wrong. Now the speaker will give another clue. 
+    Do not forget to provide your response in the given JSON format. 
+
+
+# Model: Cohere
+# Format: Brackets
+# Reminder: Direct
+# Word reminder: Yes
+best:
+  speaker_role: |
+    You are the speaker! You will be given a secret word and some restricted words. You must make your game partner 
+    guess your secret word correctly, without saying the word. You will need to give them precise and 
+    concise clues hinting at your secret word, excluding the secret word. Most importantly, you can not mention the given restricted terms in your clue.
+
+    You need to make your partner guess your secret word in as few rounds as possible.
+
+    You should never:
+    1. Say the secret word
+    2. Repeat a clue
+    3. Include restricted words in your description
+
+  guesser_role: |
+    You are the guesser! You are going to guess a secret word using clues given to you by your game partner. 
+    You need to use these clues to guess the secret word. You also need to provide arguments for each of your guesses, 
+    to help your partner create better clues. 
+
+    You and your partner need to guess the secret word in as few rounds as possible.
+
+    You should never repeat a guess.
+    
+    You should always provide your guess within brackets. It can be anywhere in your answer. For example:
+    '''
+    [orange] I think the secret word is orange, given the clues.
+    '''
+    Here's another example:
+    '''
+    When I think of an animal with fur, I think of a [cat].
+    '''
+  secret_word_message: |
+    The secret word is: {word}, and the restricted words are: {tawooords}.
+  secret_word_reminder: |
+    Remember that the secret word is: {word}. Do not say it.
+  initial_clues_phase: >
+    Now the speaker gives one clue (but don't give away the secret word and your restricted words). You cannot repeat a clue you've already given. 
+  win_message: |
+    {player_name} guessed the word correctly! The secret word is {word}. You both won!
+  wrong_guess_message: |
+    {player_name} guessed the word wrong. Now the speaker will give another clue.  
+    Guesser, do not forget to provide your guess within brackets. It can be anywhere in your answer.

@@ -78,9 +78,7 @@ class OpenAIChat(IntelligenceBackend):
         completion = client.chat.completions.create(
             model=self.model,
             messages=messages,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-            stop=STOP,
+            temperature=self.temperature
         )
 
         response = completion.choices[0].message.content
@@ -110,9 +108,9 @@ class OpenAIChat(IntelligenceBackend):
 
         # Merge the role description and the global prompt as the system prompt for the agent
         if global_prompt:  # Prepend the global prompt if it exists
-            system_prompt = f"You are a helpful assistant.\n{global_prompt.strip()}\n{BASE_PROMPT}\n\nYour name is {agent_name}.\n\nYour role:{role_desc}"
+            system_prompt = f"You are a helpful assistant.\n{global_prompt.strip()}\n\nYour name is {agent_name}.\n\nYour role:{role_desc}"
         else:
-            system_prompt = f"You are a helpful assistant. Your name is {agent_name}.\n\nYour role:{role_desc}\n\n{BASE_PROMPT}"
+            system_prompt = f"You are a helpful assistant. Your name is {agent_name}.\n\nYour role:{role_desc}\ns"
 
         all_messages = [(SYSTEM_NAME, system_prompt)]
         for msg in history_messages:

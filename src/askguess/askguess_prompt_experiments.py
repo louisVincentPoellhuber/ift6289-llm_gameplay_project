@@ -31,6 +31,7 @@ the word correctly in as few rounds as possible.
 
 file_path = os.path.abspath(__file__)
 dir_path = os.path.dirname(file_path)
+chat_history_path = os.path.join(dir_path, "chat_history")
 PROMPT_CONFIG_FILE = os.path.join(dir_path, "askguess_prompt_config.yaml")
 
 with open(PROMPT_CONFIG_FILE) as file:
@@ -73,5 +74,9 @@ for prompt_mode in PROMPT_MODES:
         arena = Arena([paya, toto], env)
         arena.launch_cli(interactive=False, max_steps=MAX_STEPS)
 
+        experiment_path = os.path.join(chat_history_path, prompt_mode)
+        if not os.path.exists(experiment_path): os.mkdir(experiment_path) # Create the directory if it doesn't exist
+
         # Saving history
-        arena.save_chat(f"src/askguess/chat_history/{prompt_mode}/askguess_{strftime('%Y_%m_%d_%H_%M_%S')}.json")
+        chat_path = os.path.join(experiment_path, f"askguess_{strftime('%Y_%m_%d_%H_%M_%S')}.json")
+        arena.save_chat(chat_path)

@@ -14,14 +14,6 @@ from chatarena.agent import Player
 from chatarena.backends import CohereAIChat, OpenAIChat, Claude
 from chatarena.environments.askguess import AskGuess
 
-import cohere
-import openai
-import anthropic
-
-#client = cohere.Client(api_key=os.environ.get("COHEREAI_API_KEY"))
-#client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-#client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-
 role_description = """
 You are going to play in a two-player word guessing game. There are two roles in the game:
 The speaker, who is given a secret word, and the guesser, who must guess the secret word. The 
@@ -36,15 +28,15 @@ PROMPT_CONFIG_FILE = os.path.join(dir_path, "askguess_prompt_config.yaml")
 with open(PROMPT_CONFIG_FILE) as file:
     prompts = yaml.safe_load(file)
 
-prompt_mode = "word_reminder"
+prompt_mode = "bracket_format"
 
 paya = Player(name="Paya",
                 role_desc=role_description,
-                backend=CohereAIChat())
+                backend=OpenAIChat())
 
 toto = Player(name="Toto",
                 role_desc=role_description,
-                backend=CohereAIChat())
+                backend=OpenAIChat())
 
 from chatarena.arena import Arena
 

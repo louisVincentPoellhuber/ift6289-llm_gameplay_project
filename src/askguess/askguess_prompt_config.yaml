@@ -1,46 +1,6 @@
 
 ## Prompt designs --------------------------------------
-## Each prompt must follow this template:
 
-## name_of_the_prompt:
-##   moderator_gives_word: ...{word}...
-##   describing_phase: ...{player}...
-##   voting_phase:
-##   moderator_says_even_votes:
-##   moderator_says_wrong_guess: ...{player_votes}...{most_voted_player}
-##   moderator_says_spy_wins: 
-##   moderator_says_villagers_win: ...{spy_name}...
-
-
-template:
-  speaker_role: |
-    You are the speaker! You will be given a secret word. You you must make your game partner 
-    guess your secret word correctly, without saying the word. You will need to give them precise and 
-    concise clues hinting at your secret word, excluding the secret word. 
-
-    You need to make your partner guess your secret word in as few rounds as possible.
-
-    You should never:
-    1. Say the secret word
-    2. Repeat a clue
-  guesser_role: |
-    You are the guesser! You are going to guess a secret word using clues given to you by your game partner. 
-    You need to use these clues to guess the secret word. You also need to provide arguments for each of your guesses, 
-    to help your partner create better clues. 
-
-    You and your partner need to guess the secret word in as few rounds as possible.
-
-    You should never repeat a guess.
-  secret_word_message: |
-    The secret word is: {word}. Remember it for the next rounds and do not say it.
-  initial_clues_phase: >
-    Now the speaker now gives one clue (but don't give away the secret word). You cannot repeat a clue you've already given.
-  win_message: |
-    {player_name} guessed the word correctly! The secret word is {word}. You both won!
-  wrong_guess_message: |
-    {player_name} guessed the word wrong. Now the speaker will give another clue. Keep in mind the 
-    guesser's guess in order to make an appropriate clue.  
-  
 # Model: Cohere
 # Format: JSON
 # Reminder: Indirect

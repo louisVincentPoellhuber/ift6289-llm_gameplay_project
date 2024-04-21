@@ -187,7 +187,6 @@ class AskGuess(Environment):
         )
         self.message_pool.append_message(message)
 
-    # TODO: study the impact of point-based rewards or highscore-based rewards
     def get_rewards(self, correct_guess: bool) -> Dict[str, float]:
         """Get rewards for each player."""
         rewards = {}

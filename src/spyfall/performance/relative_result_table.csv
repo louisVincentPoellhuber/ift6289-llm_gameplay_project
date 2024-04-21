@@ -1,0 +1,5 @@
+,N,ST,EE,RLE,CE,AME,RWE
+baseline,10,0,1.0,0,0,0,0
+remember_json_guessing_format,1,0,1.0,0,0,0,0
+remember_sentence_format,1,0,0.0,1,0,0,0
+remember_bracket_format,1,0,0.0,1,0,0,0

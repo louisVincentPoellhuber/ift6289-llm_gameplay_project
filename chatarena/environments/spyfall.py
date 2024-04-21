@@ -264,13 +264,19 @@ class SpyFall(Environment):
                 arguments = json_list[0]["properties"]["arguments"]["description"]
             except:
                 print("JSON ERROR")
+                self._end_condition = "EE"
+                self._is_terminal = True
+                print(f"Player output {action} is not a valid json.")
+                timestep = TimeStep(
+                    observation=self.get_observation(),
+                    reward=self.get_zero_rewards(),
+                    terminal=self._is_terminal,
+                )
+                return None, None, timestep
         elif response_format == "string":
             word = None
             arguments = action
-            # print("##################")
-            # print(action)
-            # print("##################")
-        return word, arguments
+        return word, arguments, None
 
     def step(self, player_name: str, action: str) -> TimeStep:
         """
@@ -320,13 +326,16 @@ class SpyFall(Environment):
                     )
                     return timestep  # stop early to avoid json error
 
-            word, arguments = self._get_word_and_argument(
+            word, arguments, timestep = self._get_word_and_argument(
                 action=action,
                 json_list=json_list,
                 response_format=self._prompts[self._prompt_config_mode][
                     "response_format"
                 ],
             )
+
+            if timestep != None:
+                return timestep
 
             message = Message(
                 agent_name=player_name,
@@ -388,13 +397,16 @@ class SpyFall(Environment):
                     )
                     return timestep  # stop early to avoid json error
 
-            word, arguments = self._get_word_and_argument(
+            word, arguments, timestep = self._get_word_and_argument(
                 action=action,
                 json_list=json_list,
                 response_format=self._prompts[self._prompt_config_mode][
                     "response_format"
                 ],
             )
+
+            if timestep != None:
+                return timestep
 
             message = Message(
                 agent_name=player_name,

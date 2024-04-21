@@ -1,0 +1,12 @@
+# Final experiments for the final report
+
+template:
+  model: |
+    command-xlarge
+  temperature: |
+    0.08
+  restrict_info: |
+    0
+  global_prompt: |
+    test
+  # all the other prompts

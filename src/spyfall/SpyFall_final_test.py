@@ -35,59 +35,58 @@ number_of_players = 6
 client = cohere.Client(os.getenv("COHEREAI_API_KEY"))
 
 # prompt_mode = "remember_json"
-prompt_modes = ["test"]
+prompt_mode = "test"
 repetitions = 1
-for prompt_mode in prompt_modes:
 
-    backend = CohereAIChat(
-        temperature=prompts[prompt_mode]["temperature"],
-        max_tokens=prompts[prompt_mode]["max_tokens"],
-        model=prompts[prompt_mode]["model_name"],
-        preamble=prompts[prompt_mode]["preamble"],
+backend = CohereAIChat(
+    temperature=prompts[prompt_mode]["temperature"],
+    max_tokens=prompts[prompt_mode]["max_tokens"],
+    model=prompts[prompt_mode]["model_name"],
+    preamble=prompts[prompt_mode]["preamble"],
+)
+
+print("\n\n", "-----------------------------------")
+print(f"PROMPT MODE:", prompt_mode, "\n\n")
+
+# Defining players
+players = ["Nancy", "Tom", "Cindy", "Jack", "Rose", "Edward"][
+    :number_of_players
+]
+random.shuffle(players)
+# First description of the game -> taken from GameEval
+role_description = prompts["role_description"].format(
+    number_of_players=len(players)
+)
+# Chatarena output format
+format_specification = prompts["json_format_specification"]
+if prompts[prompt_mode]["response_format"] == "string":
+    format_specification = ""
+
+players_list = [
+    Player(
+        name=players[i],
+        role_desc="Your name is "
+        + players[i]
+        + ","
+        + role_description
+        + format_specification,
+        backend=backend,
     )
+    for i in range(len(players[:number_of_players]))
+]
 
-    for _ in range(repetitions):
-        print("\n\n", "-----------------------------------")
-        print(f"PROMPT MODE:", prompt_mode, "\n\n")
+# Running experiment
+env = SpyFall(
+    player_names=players,
+    prompt_config_file=PROMPT_CONFIG_FILE,
+    prompt_config_mode=prompt_mode,
+    restrict_info = prompts[prompt_mode]["restrict_info"]
+)
+arena = Arena(players_list, env)
+arena.launch_cli(interactive=False, max_steps=40)
 
-        # Defining players
-        players = ["Nancy", "Tom", "Cindy", "Jack", "Rose", "Edward"][
-            :number_of_players
-        ]
-        random.shuffle(players)
-        # First description of the game -> taken from GameEval
-        role_description = prompts["role_description"].format(
-            number_of_players=len(players)
-        )
-        # Chatarena output format
-        format_specification = prompts["json_format_specification"]
-        if prompts[prompt_mode]["response_format"] == "string":
-            format_specification = ""
-
-        players_list = [
-            Player(
-                name=players[i],
-                role_desc="Your name is "
-                + players[i]
-                + ","
-                + role_description
-                + format_specification,
-                backend=backend,
-            )
-            for i in range(len(players[:number_of_players]))
-        ]
-
-        # Running experiment
-        env = SpyFall(
-            player_names=players,
-            prompt_config_file=PROMPT_CONFIG_FILE,
-            prompt_config_mode=prompt_mode,
-        )
-        arena = Arena(players_list, env)
-        arena.launch_cli(interactive=False, max_steps=40)
-
-        postfix = f"{prompt_mode}_{strftime('%Y_%m_%d_%H_%M_%S')}"
-        # Saving history
-        arena.save_chat(
-            f"src/spyfall/chat_history_BY/spyfall_{prompt_mode}_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
-        )
+postfix = f"{prompt_mode}_{strftime('%Y_%m_%d_%H_%M_%S')}"
+# Saving history
+arena.save_chat(
+    f"src/spyfall/chat_history/test/spyfall_{prompt_mode}_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
+)

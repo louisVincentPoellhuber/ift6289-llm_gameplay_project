@@ -54,6 +54,7 @@ class SpyFall(Environment):
         prompt_config_mode: str,
         prompt_config_file: str,
         player_names: List[str],
+        restrict_info: bool = False,
         topic_codes: Dict[str, List[str]] = None,
         **kwargs,
     ):
@@ -81,6 +82,7 @@ class SpyFall(Environment):
         self._end_condition = None
         self._prompt_config_mode = prompt_config_mode
         self._prompt_config_prompt_config_file = prompt_config_file
+        self.restrict_info = restrict_info
 
         # number of roungs
         self._ONE_ROUND = False
@@ -448,6 +450,24 @@ class SpyFall(Environment):
                     accuse_correct = False
 
                 if not accuse_correct:
+                    if self.restrict_info:
+                        self.message_pool.reset()
+
+                        self._moderator_speak(
+                            self._prompts[self._prompt_config_mode]["moderator_gives_word"]
+                            .format(word=self.non_spy_word)
+                            .replace(r"{{", "{")
+                            .replace(r"}}", "}"),
+                            visible_to=self.non_spy_names,
+                        )
+                        # Moderator gives word to spy
+                        self._moderator_speak(
+                            self._prompts[self._prompt_config_mode]["moderator_gives_word"]
+                            .format(word=self.spy_word)
+                            .replace(r"{{", "{")
+                            .replace(r"}}", "}"),
+                            visible_to=self.spy_name,
+                        )
                     if even_vote:
                         self._moderator_speak(
                             # Even player votes
@@ -500,7 +520,7 @@ class SpyFall(Environment):
                         terminal = True
                         self._end_condition = "SPYWINS"
                 else:
-                    self._end_condition = "SPYLOOSES"  # SW
+                    self._end_condition = "SPYLOSES"  # SW
                     self._moderator_speak(
                         self._prompts[self._prompt_config_mode][
                             "moderator_says_villagers_win"
@@ -513,7 +533,7 @@ class SpyFall(Environment):
             timestep = TimeStep(
                 observation=self.get_observation(), reward=rewards, terminal=terminal
             )
-
+        
         # Check if the player signals the end of the conversation
         if self.is_terminal():
             timestep.terminal = True

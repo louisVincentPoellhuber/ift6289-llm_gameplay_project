@@ -89,5 +89,5 @@ for prompt_mode in prompt_modes:
         postfix = f"{prompt_mode}_{strftime('%Y_%m_%d_%H_%M_%S')}"
         # Saving history
         arena.save_chat(
-            f"src/spyfall/chat_history_BY/spyfall_{prompt_mode}_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
+            f"src/spyfall/chat_history/test/spyfall_{prompt_mode}_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
         )

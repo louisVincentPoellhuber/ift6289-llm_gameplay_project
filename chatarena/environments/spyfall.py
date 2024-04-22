@@ -66,6 +66,7 @@ class SpyFall(Environment):
 
         # The "state" of the environment is maintained by the message pool
         self.message_pool = MessagePool()
+        self.permanent_message_pool = MessagePool()
 
         # Randomly sample a topic, code and spy player
         self.topic = None
@@ -451,6 +452,8 @@ class SpyFall(Environment):
 
                 if not accuse_correct:
                     if self.restrict_info:
+                        for message in self.message_pool._messages:
+                            self.permanent_message_pool.append_message(message)
                         self.message_pool.reset()
 
                         self._moderator_speak(
@@ -530,9 +533,10 @@ class SpyFall(Environment):
 
                 self._current_turn += 1
 
-            timestep = TimeStep(
-                observation=self.get_observation(), reward=rewards, terminal=terminal
-            )
+            if self.restrict_info:
+                timestep = TimeStep(observation=self.permanent_message_pool.get_all_messages(), reward=rewards, terminal=terminal)
+            else:
+                timestep = TimeStep(observation=self.get_observation(), reward=rewards, terminal=terminal)
         
         # Check if the player signals the end of the conversation
         if self.is_terminal():

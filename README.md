@@ -54,13 +54,13 @@ The **Arena** is the main framework, it's what connects **Players** to the prope
 In this section we'll cover how to run our code and how to recreate our experiments. The folder you'll want to look at is `src`. Inside it, there are three subfolders, `askguess`, `spyfall` and `taboo`, one for each game. Each subfolder has the following:
 
 ## Testing File
-Each game should have a python file for testing, called `game_test.py`. This is where we test implementations and run quick experiments. You can use this file to see an example of the game using the pretermined configuration. 
+Each game should have a python file for testing, called `game_something_test.py`. This is where we test implementations and run quick experiments. You can use this file to see an example of the game using the pretermined configuration. The **midway** and **final** tags represent the tests we've done for the corresponding reports. 
 
 ## Game Configuration
 Game configurations are hosted on YAML files. These files hold hardcoded prompts, befitting whichever prompt strategy we adopt. This is how we can quickly run experiments, by simply iterating through different configurations. Setting up the YAML file can be complicated, as it's also necessary to go edit the **Environment** file to make sure the game logic can retrieve the correct prompts at the correct time. It became necessary for us to define many game states and lots of **IF** statements to trigger the right prompts at the right time. 
 
 ## Experiment Files
-These files are a generalization of the testing file. Each game should have a file called `game_something_experiment.py`. The **prompt** experiments are those ran for the midway report as well as for part of the final report, while the TODO FINISH THIS SENTENCE. 
+These files are a generalization of the testing file. Each game should have a file called `game_something_experiment.py`. The **prompt** experiments are those ran for the midway report as well as for part of the final report, while the **final** experiments are those ran for the final report.. 
 
 This file is quite simple, we provide a list of different prompt configurations to test, as well as the number of tests to run. Then, the experiments will run on your terminal. The different conversations will be saved in subfolders of the `chat_history` folder, each correpsonding to the title of the prompt configuration used. 
 

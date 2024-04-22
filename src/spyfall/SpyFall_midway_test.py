@@ -44,12 +44,7 @@ prompt_modes = [
 repetitions = 1
 for prompt_mode in prompt_modes:
 
-    backend = CohereAIChat(
-        temperature=prompts[prompt_mode]["temperature"],
-        max_tokens=prompts[prompt_mode]["max_tokens"],
-        model=prompts[prompt_mode]["model_name"],
-        preamble=prompts[prompt_mode]["preamble"],
-    )
+    backend = CohereAIChat()
 
     for _ in range(repetitions):
         print("\n\n", "-----------------------------------")

@@ -32,11 +32,11 @@ prompt_mode = "bracket_format"
 
 paya = Player(name="Paya",
                 role_desc=role_description,
-                backend=OpenAIChat())
+                backend=CohereAIChat())
 
 toto = Player(name="Toto",
                 role_desc=role_description,
-                backend=OpenAIChat())
+                backend=CohereAIChat())
 
 from chatarena.arena import Arena
 

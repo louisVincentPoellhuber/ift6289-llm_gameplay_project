@@ -1,12 +1,73 @@
+role_description: |
+  You are one of the player of spyfall.
+
+json_format_specification: |
+  Always use this JSON template in your answer:
+  {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "word": {
+        "description": "your secret word",
+        "type": "string"
+      },
+      "arguments": {
+        "description": "what you are going to say to your opponent",
+        "type": "string"
+      }
+    },
+    "required": ["word", "arguments"]
+  }
+
 # Final experiments for the final report
 
-template:
-  model: |
-    command-xlarge
-  temperature: |
-    0.08
-  restrict_info: |
-    0
-  global_prompt: |
-    test
-  # all the other prompts
+test:
+  model_name: command-r-plus
+  temperature: 0.4
+  max_tokens: 1000
+  restrict_info: 0
+  response_format: string
+  guess_format: brackets
+  preamble: | 
+    You are one of the player of spyfall.
+
+    There are multiple players in this game. 
+    At the beginning of the game, everyone will receive a word.
+    There is one spy who will receive a spy word, while others will receive a common word.
+    Spy word is different but relevant to common words. For example, the spy word can be "apple", and the common word is "banana".
+
+    There are two stages in each round of the game.
+
+    The first stage is describing stage:
+    In this stage, the only thing you need to do is use a word or a few words to say something in turn about the word he received without directly saying the word.
+    The funniest part of the game is that since you do not know other's words, you are not sure whether you are the spy.
+    So, you can only infer who have the different based on other players description.
+
+    The second stage is the voting stage:
+    In this stage, You MUST VOTE for someone, THE ONLY THING you do is analyse all player's text and vote for the player you think is the spy and tell the reason why you think he is the spy.
+    You should always provide only your accusing name within * mark. Suppose your name is Amy, For example:
+      "Amy: I don't aggree with Nancy. I think that *Jack* is the spy, because of..."
+      Only include the name you believe is a spy in *.
+      If you are accused, fight for your self and find suspicious descrption of other players.
+
+      Analyze who is the different one, try find the spy!  And never reveal your secret word! Remeber your name, you are always this player!!
+  moderator_gives_word: "Your word is: {word}. Remember it for the next rounds and do not say it."
+  describing_phase: |
+    Now it's the describing stage, the only thing you do is describe your secret word in one sentence and without directly revealing it.
+    You cannot repeat what others has said. We will start with {player}.
+  voting_phase: |
+    You MUST VOTE for someone. You should always provide only your accusing name within * mark. Suppose your name is Amy, here is a template for you:
+    '''
+    Amy: I don't aggree with Vera. I think that *Alex* is the spy, because of...
+    '''
+    Only include the name you believe is a spy in *.
+    Analyze who is the different one, try find the spy! 
+    And never reveal your secret word!!Remeber your name, you are always this player!!
+  moderator_says_even_votes: |
+    There are even votes. The accusation does not stand.
+  moderator_says_wrong_guess: |
+    Votes: {player_votes}.
+    The most-voted player is {most_voted_player}. The accusation is incorrect.
+    Removing player: {most_voted_player}.
+  moderator_says_spy_wins: Less than 4 players now! Spy wins.
+  moderator_says_villagers_win: The accusation is correct! {spy_name} is the spy!

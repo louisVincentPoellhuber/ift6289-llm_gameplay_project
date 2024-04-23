@@ -28,7 +28,7 @@ DEFAULT_TOPIC_CODES = {
     ],
     "Official places": [
         "Police Station",
-        "Fire",
+        "Fire Department",
     ],
     "Instruments": [
         "Electic Guitar",
@@ -42,6 +42,14 @@ DEFAULT_TOPIC_CODES = {
         "Hammer",
         "Screwdriver",
     ],
+    "Ships": ["Pirate ship", "Cruise ship"],
+    "Fruits2": ["Strawberry", "Blueberry"],
+    "Fruits3": ["Orange", "Apple"],
+    "Animals2": ["Panda", "Grizzly Bear"],
+    "Animals3": ["Zebra", "Horse"],
+    "Instruments2": ["Piano", "Synthesizer"],
+    "Furniture2": ["Bed", "Sofa"],
+    "Furniture3": ["Dining Table", "Coffee Table"],
 }
 
 
@@ -418,13 +426,11 @@ class SpyFall(Environment):
                 turn=self._current_turn,
             )
 
-
             if self._prompts[self._prompt_config_mode]["response_format"] == "string":
                 self.message_pool.append_message(message)
-                pattern = r'\*([^*]+)\*'
+                pattern = r"\*([^*]+)\*"
                 vote = str(re.findall(pattern, arguments))
                 vote = self._text2vote(vote)
-
 
             if vote in self.player_names:
                 self._players_votes[vote] += 1
@@ -457,7 +463,9 @@ class SpyFall(Environment):
                         self.message_pool.reset()
 
                         self._moderator_speak(
-                            self._prompts[self._prompt_config_mode]["moderator_gives_word"]
+                            self._prompts[self._prompt_config_mode][
+                                "moderator_gives_word"
+                            ]
                             .format(word=self.non_spy_word)
                             .replace(r"{{", "{")
                             .replace(r"}}", "}"),
@@ -465,7 +473,9 @@ class SpyFall(Environment):
                         )
                         # Moderator gives word to spy
                         self._moderator_speak(
-                            self._prompts[self._prompt_config_mode]["moderator_gives_word"]
+                            self._prompts[self._prompt_config_mode][
+                                "moderator_gives_word"
+                            ]
                             .format(word=self.spy_word)
                             .replace(r"{{", "{")
                             .replace(r"}}", "}"),
@@ -534,10 +544,18 @@ class SpyFall(Environment):
                 self._current_turn += 1
 
             if self.restrict_info:
-                timestep = TimeStep(observation=self.permanent_message_pool.get_all_messages(), reward=rewards, terminal=terminal)
+                timestep = TimeStep(
+                    observation=self.permanent_message_pool.get_all_messages(),
+                    reward=rewards,
+                    terminal=terminal,
+                )
             else:
-                timestep = TimeStep(observation=self.get_observation(), reward=rewards, terminal=terminal)
-        
+                timestep = TimeStep(
+                    observation=self.get_observation(),
+                    reward=rewards,
+                    terminal=terminal,
+                )
+
         # Check if the player signals the end of the conversation
         if self.is_terminal():
             timestep.terminal = True

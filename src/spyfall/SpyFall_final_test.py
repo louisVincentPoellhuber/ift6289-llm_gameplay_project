@@ -35,7 +35,8 @@ number_of_players = 6
 client = cohere.Client(os.getenv("COHEREAI_API_KEY"))
 
 # prompt_mode = "remember_json"
-prompt_mode = "test"
+# prompt_mode = "test"
+prompt_mode = "chain_of_thoughts"
 repetitions = 1
 
 backend = CohereAIChat(
@@ -49,14 +50,10 @@ print("\n\n", "-----------------------------------")
 print(f"PROMPT MODE:", prompt_mode, "\n\n")
 
 # Defining players
-players = ["Nancy", "Tom", "Cindy", "Jack", "Rose", "Edward"][
-    :number_of_players
-]
+players = ["Nancy", "Tom", "Cindy", "Jack", "Rose", "Edward"][:number_of_players]
 random.shuffle(players)
 # First description of the game -> taken from GameEval
-role_description = prompts["role_description"].format(
-    number_of_players=len(players)
-)
+role_description = prompts["role_description"].format(number_of_players=len(players))
 # Chatarena output format
 format_specification = prompts["json_format_specification"]
 if prompts[prompt_mode]["response_format"] == "string":
@@ -80,7 +77,7 @@ env = SpyFall(
     player_names=players,
     prompt_config_file=PROMPT_CONFIG_FILE,
     prompt_config_mode=prompt_mode,
-    restrict_info = prompts[prompt_mode]["restrict_info"]
+    restrict_info=prompts[prompt_mode]["restrict_info"],
 )
 arena = Arena(players_list, env)
 arena.launch_cli(interactive=False, max_steps=40)

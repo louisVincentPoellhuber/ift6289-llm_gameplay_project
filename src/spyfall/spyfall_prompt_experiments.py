@@ -1,6 +1,7 @@
 import sys
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 CHATARENA_PATH = os.getenv("CHATARENA_PATH")
 sys.path.append(CHATARENA_PATH)
@@ -37,9 +38,10 @@ with open(PROMPT_CONFIG_FILE) as file:
     prompts = yaml.safe_load(file)
 
 
-NB_EXPERIMENTS = 10
+NB_EXPERIMENTS = 1
 MAX_STEPS = 20
-PROMPT_MODES = ["baseline", "remember_json_guessing_format", "remember_sentence_format", "remember_bracket_format"]
+# PROMPT_MODES = ["baseline", "remember_json_guessing_format", "remember_sentence_format", "remember_bracket_format"]
+PROMPT_MODES = ["bracket_chain_of_thoughts"]
 # ================= EXPERIMENTS ================
 
 for prompt_mode in PROMPT_MODES:
@@ -80,8 +82,11 @@ for prompt_mode in PROMPT_MODES:
         arena.launch_cli(interactive=False, max_steps=MAX_STEPS)
 
         experiment_path = os.path.join(chat_history_path, prompt_mode)
-        if not os.path.exists(experiment_path): os.mkdir(experiment_path) # Create the directory if it doesn't exist
+        if not os.path.exists(experiment_path):
+            os.mkdir(experiment_path)  # Create the directory if it doesn't exist
 
         # Saving history
-        chat_path = os.path.join(experiment_path, f"spyfall_{strftime('%Y_%m_%d_%H_%M_%S')}.json")
+        chat_path = os.path.join(
+            experiment_path, f"spyfall_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
+        )
         arena.save_chat(chat_path)

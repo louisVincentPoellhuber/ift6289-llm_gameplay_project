@@ -267,7 +267,7 @@ class Taboo(Environment):
         if self._current_phase == "give clues":
 
             # Switch formats
-            if (self._prompt_config_mode=="bracket_format") | (self._prompt_config_mode=="best"):
+            if (self._prompt_config_mode=="bracket_format") | (self._prompt_config_mode=="best") | (self._prompt_config_mode=="final_baseline"):
                 clue, timestep = self.get_bracket_response(action)
             elif self._prompt_config_mode=="sentence_format":
                 clue, timestep = self.get_sentence_response(action)
@@ -316,7 +316,7 @@ class Taboo(Environment):
         elif self._current_phase == "guess":
 
             # Switch formats
-            if (self._prompt_config_mode=="bracket_format") | (self._prompt_config_mode=="best"):
+            if (self._prompt_config_mode=="bracket_format") | (self._prompt_config_mode=="best") | (self._prompt_config_mode=="final_baseline"):
                 guess, arguments, timestep = self.get_bracket_response(action)
             elif self._prompt_config_mode=="sentence_format":
                 guess, arguments, timestep = self.get_sentence_response(action)

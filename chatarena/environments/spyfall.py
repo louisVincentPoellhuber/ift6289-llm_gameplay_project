@@ -109,13 +109,13 @@ class SpyFall(Environment):
     def reset(self):
         """Sample topic, code and spy code."""
         self.topic = random.choice(list(self.topic_codes.keys()))
-        self.code = random.choice(self.topic_codes[self.topic])
+        #self.code = random.choice(self.topic_codes[self.topic])
         self.spy_name = random.choice(self.player_names)
         self.non_spy_names = [
             name for name in self.player_names if name != self.spy_name
         ]
-        self.spy_word = self.topic_codes[self.topic][0]
-        self.non_spy_word = self.topic_codes[self.topic][1]
+        self.spy_word = random.choice(self.topic_codes[self.topic])
+        self.non_spy_word = random.choice(self.topic_codes[self.topic])
 
         self._current_turn = 0
         self._next_player_idx = 0

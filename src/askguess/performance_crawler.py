@@ -6,7 +6,7 @@ from glob import glob
 
 file_path = os.path.abspath(__file__)
 dir_path = os.path.dirname(file_path)
-PROMPT_MODES = ["baseline", "bracket_format", "sentence_format", "format_reminder", "word_reminder", "best"]
+PROMPT_MODES = ["final_baseline"]
 
 result_table = pd.DataFrame(columns=["N", "ST", "EE", "RLE", "CE", "AME", "RWE"], index = PROMPT_MODES).fillna(0)
 relative_result_table = result_table.copy()

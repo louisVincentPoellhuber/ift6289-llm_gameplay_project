@@ -6,9 +6,9 @@ from glob import glob
 
 file_path = os.path.abspath(__file__)
 dir_path = os.path.dirname(file_path)
-PROMPT_MODES =  ["test"]
+PROMPT_MODES =  ["final_baseline", "command_r", "add_restrict_info", "low_temperature", "high_temperature", "sub_cot", "sub_preamble"]
 
-result_table = pd.DataFrame(columns=["N", "ST", "EE", "RLE", "CE", "SLR", "SWR"], index = PROMPT_MODES).fillna(0)
+result_table = pd.DataFrame(columns=["N", "ST", "EE", "RLE", "CE", "AGR", "SLR"], index = PROMPT_MODES).fillna(0)
 relative_result_table = result_table.copy()
 
 slr = 0
@@ -27,24 +27,25 @@ for prompt_mode in PROMPT_MODES:
         conversation_ending = conversation_json["metrics"]["end_condition"]
         nb_turns = conversation_json["metrics"]["nb_turns"]
 
-        result_table.at[prompt_mode, "SLR"] += nb_turns
+        result_table.at[prompt_mode, "AGR"] += nb_turns
         if (conversation_ending == "SPYWINS") | (conversation_ending == "SPYLOSES"):
             result_table.at[prompt_mode, "ST"] += 1
-            result_table.at[prompt_mode, "SWR"] += int(conversation_ending == "SPYWINS")
+            result_table.at[prompt_mode, "SLR"] += int(conversation_ending == "SPYLOSES")
+            relative_result_table.at[prompt_mode, "ST"] = result_table.at[prompt_mode, "ST"] / result_table.at[prompt_mode, "N"]
 
         else:            
             result_table.at[prompt_mode, conversation_ending] += 1
             relative_result_table.at[prompt_mode, conversation_ending] = result_table.at[prompt_mode, conversation_ending] / result_table.at[prompt_mode, "N"]
 
     if result_table.at[prompt_mode, "ST"] == 0:
-        result_table.at[prompt_mode, "SWR"] = 0
-        relative_result_table.at[prompt_mode, "SWR"] = 0
+        result_table.at[prompt_mode, "SLR"] = 0
+        relative_result_table.at[prompt_mode, "SLR"] = 0
     else:
-        result_table.at[prompt_mode, "SWR"] = result_table.at[prompt_mode, "SWR"] / result_table.at[prompt_mode, "ST"]
-        relative_result_table.at[prompt_mode, "SWR"] = result_table.at[prompt_mode, "SWR"] 
+        result_table.at[prompt_mode, "SLR"] = result_table.at[prompt_mode, "SLR"] / result_table.at[prompt_mode, "ST"]
+        relative_result_table.at[prompt_mode, "SLR"] = result_table.at[prompt_mode, "SLR"] 
     
-    result_table.at[prompt_mode, "SLR"] = result_table.at[prompt_mode, "SLR"] / result_table.at[prompt_mode, "N"]
-    relative_result_table.at[prompt_mode, "SLR"] = result_table.at[prompt_mode, "SLR"]
+    result_table.at[prompt_mode, "AGR"] = result_table.at[prompt_mode, "AGR"] / result_table.at[prompt_mode, "N"] / 6
+    relative_result_table.at[prompt_mode, "AGR"] = result_table.at[prompt_mode, "AGR"]
 
 out_path = os.path.join(dir_path, "performance")
 result_table.to_csv(os.path.join(out_path, "result_table.csv"))

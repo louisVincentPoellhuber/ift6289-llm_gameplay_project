@@ -31,7 +31,7 @@ with open(PROMPT_CONFIG_FILE) as file:
     prompts = yaml.safe_load(file)
 
 
-with open(r"src\datasets\askguess.json", "r") as fp:
+with open(r"src\datasets\spyfall.json", "r") as fp:
     topic_codes = json.load(fp)
 
 # Name of the players

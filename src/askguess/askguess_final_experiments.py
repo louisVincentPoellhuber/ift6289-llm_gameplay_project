@@ -74,6 +74,6 @@ for i in range(8):
 
     # Saving history
     chat_path = os.path.join(
-        experiment_path, f"spyfall_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
+        experiment_path, f"askguess_{strftime('%Y_%m_%d_%H_%M_%S')}.json"
     )
     arena.save_chat(chat_path)

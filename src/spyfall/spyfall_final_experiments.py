@@ -29,14 +29,14 @@ with open(PROMPT_CONFIG_FILE) as file:
     prompts = yaml.safe_load(file)
 
 
-with open(r"src\datasets\askguess.json", "r") as fp:
+with open(r"src\datasets\spyfall.json", "r") as fp:
     topic_codes = json.load(fp)
 
 
 
-NB_EXPERIMENTS = 5
+NB_EXPERIMENTS = 10
 MAX_STEPS = 48
-PROMPT_MODES = [ "sub_preamble"]
+PROMPT_MODES = ["final_baseline"]
 
 for prompt_mode in PROMPT_MODES:
     print(f"======================= Doing {prompt_mode} =======================")

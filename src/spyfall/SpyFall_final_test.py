@@ -5,6 +5,7 @@ import cohere
 from time import strftime
 from dotenv import load_dotenv
 import random
+import json
 
 # sys.stdout = open("output_spyfall.txt", "w")
 
@@ -29,6 +30,10 @@ PROMPT_CONFIG_FILE = dir_path + "/spyfall_final_experiments.yaml"
 with open(PROMPT_CONFIG_FILE) as file:
     prompts = yaml.safe_load(file)
 
+
+with open(r"src\datasets\askguess.json", "r") as fp:
+    topic_codes = json.load(fp)
+
 # Name of the players
 number_of_players = 6
 # Starting cohere backend
@@ -36,7 +41,7 @@ client = cohere.Client(os.getenv("COHEREAI_API_KEY"))
 
 # prompt_mode = "remember_json"
 # prompt_mode = "test"
-prompt_mode = "chain_of_thoughts"
+prompt_mode = "final_baseline"
 repetitions = 1
 
 backend = CohereAIChat(
@@ -54,10 +59,8 @@ players = ["Nancy", "Tom", "Cindy", "Jack", "Rose", "Edward"][:number_of_players
 random.shuffle(players)
 # First description of the game -> taken from GameEval
 role_description = prompts["role_description"].format(number_of_players=len(players))
-# Chatarena output format
-format_specification = prompts["json_format_specification"]
-if prompts[prompt_mode]["response_format"] == "string":
-    format_specification = ""
+
+
 
 players_list = [
     Player(
@@ -65,8 +68,7 @@ players_list = [
         role_desc="Your name is "
         + players[i]
         + ","
-        + role_description
-        + format_specification,
+        + role_description,
         backend=backend,
     )
     for i in range(len(players[:number_of_players]))
@@ -78,6 +80,7 @@ env = SpyFall(
     prompt_config_file=PROMPT_CONFIG_FILE,
     prompt_config_mode=prompt_mode,
     restrict_info=prompts[prompt_mode]["restrict_info"],
+    topic_codes = topic_codes
 )
 arena = Arena(players_list, env)
 arena.launch_cli(interactive=False, max_steps=40)

@@ -24,7 +24,7 @@ DEFAULT_TOPIC_CODES = {
     ],
     "Transport": [
         "Airplane",
-        "Hellicopter",
+        "Helicopter",
     ],
     "Official places": [
         "Police Station",

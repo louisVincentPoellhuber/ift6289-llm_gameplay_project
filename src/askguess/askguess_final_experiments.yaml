@@ -1,0 +1,64 @@
+
+# This is the same experimental design as Spyfall, but adapted for Ask-Guess. 
+# Note that this was done only for comparion's sake. Due to lack of interest 
+# and especially lack of time, restrict_info was not implemented for this game.
+final_baseline:
+  max_tokens: 1000
+  response_format: string
+  model_name: command-r-plus
+  temperature: 0.4
+  restrict_info: False
+  preamble: |
+    You are going to play in a two-player word guessing game. There are two roles in the game:
+    The speaker, who is given a secret word, and the guesser, who must guess the secret word. The 
+    speaker will give the guesser clues relating to the secret word. Together, the two must guess 
+    the word correctly in as few rounds as possible. 
+
+    The first phase of the game is the clues phase. The speaker must give informative clues about 
+    the secret word to the guesser. 
+
+    The second phase of the game is the guessing phase. The guesser must make a guess as to what 
+    the secret word is, given the clue. The guesser must put their guess in brackets, like so: 
+    'I think the secret word is [cat].'
+  speaker_role: |
+    You are the speaker! You will be given a secret word. You you must make your game partner 
+    guess your secret word correctly, without saying the word. You will need to give them precise and 
+    concise clues hinting at your secret word, excluding the secret word. 
+
+    You need to make your partner guess your secret word in as few rounds as possible.
+
+    You should never:
+    1. Say the secret word
+    2. Repeat a clue
+
+  guesser_role: |
+    You are the guesser! You are going to guess a secret word using clues given to you by your game partner. 
+    You need to use these clues to guess the secret word. You also need to provide arguments for each of your guesses, 
+    to help your partner create better clues. 
+
+    You and your partner need to guess the secret word in as few rounds as possible.
+
+    You should never repeat a guess.
+    
+    You should always provide your guess within brackets. It can be anywhere in your answer. For example:
+    '''
+    [orange] I think the secret word is orange, given the clues.
+    '''
+    Here's another example:
+    '''
+    When I think of an animal with fur, I think of a [cat].
+    '''
+  secret_word_message: |
+    The secret word is: {word}. Remember it for the next rounds and do not say it.
+  secret_word_reminder: |
+    Remember that the secret word is: {word}. Do not say it.
+  initial_clues_phase: >
+    Now the speaker now gives one clue (but don't give away the secret word). You cannot repeat a clue you've already given. 
+    Guesser, do not forget to provide your guess within brackets. It can be anywhere in your answer. Additionally, provide 
+    describe your reasoning in steps.
+  win_message: |
+    {player_name} guessed the word correctly! The secret word is {word}. You both won!
+  wrong_guess_message: |
+    {player_name} guessed the word wrong. Now the speaker will give another clue. Keep in mind the 
+    guesser's guess in order to make an appropriate clue.  
+    Guesser, do not forget to provide your guess within brackets. It can be anywhere in your answer.

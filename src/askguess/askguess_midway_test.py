@@ -40,7 +40,7 @@ toto = Player(name="Toto",
 
 from chatarena.arena import Arena
 
-with open(r"C:\Users\Louis\Documents\University\Masters\H24 - Deep NLP\ift6289-llm_gameplay_project\datasets\askguess.json", "r") as fp:
+with open(r"src\datasets\askguess.json", "r") as fp:
     word_list = json.load(fp)["wordict"]
 
 

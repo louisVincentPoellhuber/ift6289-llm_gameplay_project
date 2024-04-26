@@ -14,11 +14,7 @@ from chatarena.agent import Player
 from chatarena.backends import CohereAIChat, OpenAIChat, Claude
 from chatarena.environments.taboo import Taboo
 
-import cohere
-import openai
-#client = cohere.Client(api_key=os.environ.get("COHEREAI_API_KEY"))
-#client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-#client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+import random
 
 role_description = """
 You are going to play in a two-player word guessing game. There are two roles in the game:
@@ -45,7 +41,9 @@ toto = Player(name="Toto",
 
 from chatarena.arena import Arena
 
-with open(r"/Users/yibeel/Desktop/clone/ift6289-llm_gameplay_project/datasets/taboo/web.json", "r") as fp:
+datasets = os.listdir(r"src\datasets\taboo")
+random_dataset = random.choice(datasets)
+with open(rf"src\datasets\taboo\{random_dataset}", "r") as fp:
     taboo = json.load(fp)
 
 

@@ -36,7 +36,7 @@ with open(r"src\datasets\spyfall.json", "r") as fp:
 
 NB_EXPERIMENTS = 10
 MAX_STEPS = 48
-PROMPT_MODES = ["final_baseline"]
+PROMPT_MODES = ["final_baseline", "command_r", "add_restrict_info", "low_temperature", "high_temperature", "sub_cot", "sub_preamble"]
 
 for prompt_mode in PROMPT_MODES:
     print(f"======================= Doing {prompt_mode} =======================")

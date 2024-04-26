@@ -55,10 +55,10 @@ final_baseline:
   initial_clues_phase: >
     Now the speaker now gives one clue (but don't give away the secret word). You cannot repeat a clue you've already given. 
     Guesser, do not forget to provide your guess within brackets. It can be anywhere in your answer. Additionally, provide 
-    describe your reasoning in steps.
+    describe your reasoning in steps. Be careful not to say the secret word.
   win_message: |
     {player_name} guessed the word correctly! The secret word is {word}. You both won!
   wrong_guess_message: |
     {player_name} guessed the word wrong. Now the speaker will give another clue. Keep in mind the 
     guesser's guess in order to make an appropriate clue.  
-    Guesser, do not forget to provide your guess within brackets. It can be anywhere in your answer.
+    Guesser, do not forget to provide your guess within brackets. It can be anywhere in your answer. 

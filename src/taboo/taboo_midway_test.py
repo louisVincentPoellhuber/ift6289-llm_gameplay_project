@@ -14,6 +14,7 @@ from chatarena.backends import CohereAIChat
 from chatarena.environments.taboo import Taboo
 
 import cohere
+import random
 
 client = cohere.Client(api_key=os.environ.get("COHEREAI_API_KEY"))
 
@@ -34,31 +35,10 @@ toto = Player(name="Toto",
 
 from chatarena.arena import Arena
 
-taboo = {
-  "Fish": [
-    "water",
-    "swim",
-    "gills",
-    "whale",
-    "salmon",
-    "fishing"
-  ],
-  "Flamingo": [
-    "pink",
-    "bird"
-  ],
-  "Fox": [
-    "red",
-    "fur",
-    "city",
-    "goose"
-  ],
-  "Frog": [
-    "croak",
-    "water",
-    "toad"
-  ]
-}
+datasets = os.listdir(r"src\datasets\taboo")
+random_dataset = random.choice(datasets)
+with open(rf"src\datasets\taboo\{random_dataset}", "r") as fp:
+    taboo = json.load(fp)
 
 env = Taboo(player_names = ["Paya", "Toto"], taboo = taboo)
 arena = Arena([paya, toto], env)

@@ -13,6 +13,7 @@ from time import strftime
 from chatarena.agent import Player
 from chatarena.backends import CohereAIChat, OpenAIChat, Claude
 from chatarena.environments.taboo import Taboo
+import random
 
 
 file_path = os.path.abspath(__file__)
@@ -35,7 +36,9 @@ toto = Player(name="Toto",
 
 from chatarena.arena import Arena
 
-with open(r"src\datasets\taboo\web.json", "r") as fp:
+datasets = os.listdir(r"src\datasets\taboo")
+random_dataset = random.choice(datasets)
+with open(rf"src\datasets\taboo\{random_dataset}", "r") as fp:
     taboo = json.load(fp)
 
 

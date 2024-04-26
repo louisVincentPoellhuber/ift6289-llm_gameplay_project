@@ -56,7 +56,7 @@ toto = Player(name="Toto",
                 role_desc=role_description,
                 backend=CohereAIChat())
 
-for i in range(8):
+for i in range(6):
     # Running experiment
     env = AskGuess(
         player_names = ["Paya", "Toto"], 

@@ -54,10 +54,10 @@ final_baseline:
   secret_word_reminder: |
     Remember that the secret word is: {word}. Do not say it.
   initial_clues_phase: >
-    Now the speaker gives one clue (but don't give away the secret word and your restricted words). You cannot repeat a clue you've already given. 
+    Now the speaker gives one clue (but don't give away the secret word and your restricted words). You cannot repeat a clue you've already given. Additionally, provide 
+    describe your reasoning in steps. Be careful not to say the secret word or any restricted words. 
   win_message: |
     {player_name} guessed the word correctly! The secret word is {word}. You both won!
   wrong_guess_message: |
     {player_name} guessed the word wrong. Now the speaker will give another clue.  
-    Guesser, do not forget to provide your guess within brackets. It can be anywhere in your answer. Additionally, provide 
-    describe your reasoning in steps.
+    Guesser, do not forget to provide your guess within brackets. It can be anywhere in your answer. 

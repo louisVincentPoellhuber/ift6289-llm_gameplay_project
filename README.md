@@ -50,7 +50,7 @@ The **Arena** is the main framework, it's what connects **Players** to the prope
 
 # 4. Running the Code
 
-In this section we'll cover how to run our code and how to recreate our experiments. The folder you'll want to look at is `src`. Inside it, there are three subfolders, `askguess`, `spyfall` and `taboo`, one for each game. Each subfolder has the following:
+In this section we'll cover how to run our code and how to recreate our experiments. They were run on Python 3.10. The folder you'll want to look at is `src`. Inside it, there are three subfolders, `askguess`, `spyfall` and `taboo`, one for each game. Each subfolder has the following:
 
 ## Testing File
 Each game should have a python file for testing, called `game_something_test.py`. This is where we test implementations and run quick experiments. You can use this file to see an example of the game using the pretermined configuration. The **midway** and **final** tags represent the tests we've done for the corresponding reports. 

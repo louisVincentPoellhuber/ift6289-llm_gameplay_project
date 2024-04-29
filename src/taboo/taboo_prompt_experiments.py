@@ -49,7 +49,7 @@ with open(rf"src\datasets\taboo\{random_dataset}", "r") as fp:
 
 NB_EXPERIMENTS = 10
 MAX_STEPS = 20
-PROMPT_MODES = ["best"]
+PROMPT_MODES = ["baseline", "bracket_format", "sentence_format", "format_reminder", "word_reminder", "best"]
 # ================= EXPERIMENTS ================
 
 for prompt_mode in PROMPT_MODES:

@@ -27,10 +27,9 @@ It is crucial to add the `CHATARENA_PATH` environment variable, as it's what all
 You'll find in this directory a couple of important folders. 
 
 - **admin**: This folder hosts all three of our report submissions.
-- **datasets**: This folder holds the different datasets we use. The *ask-guess* and *spyfall* datasets are saved in a JSON file, while the *taboo* datasets are saved in multiple JSON files for different topics. 
 - **references**: This folder hosts all our related work, the different articles we took inspiration from. 
 - **chatarena**: This folder is a fork from the [ChatArena github repository](https://github.com/Farama-Foundation/chatarena). This is the package we modified and it hosts our custom implementation of the framework. The next section will be dedicated to explain how it works.
-- **src**: This folder hosts all the code to run the arena. It is mostly separated in three subfolders, one for each game. A further section will be dedicated to explain how to run our code. 
+- **src**: This folder hosts all the code and datasets necessary to run the arena. It is mostly separated in four subfolders, one for each game and the datasets. A further section will be dedicated to explain how to run our code. 
 
 # 3. ChatArena
 
@@ -74,7 +73,7 @@ This subfolder holds all the chat histories of different experiments. It contain
 This way to save the chat history was largely implemented by us, expanding on ChatArena's base function. 
 
 ## Performance
-To evaluate the performance of each experiment, we use the `performance_crawler.py` file. This file simply goes through the different chat histories it is provided with and calculates how many of each ending state it finds, for each prompt strategy. It then saves those metrics in the `performance` subfolder of each game, as absolute or relative values. The CSV file can then easily be translated into visualisations or into LaTeX. 
+To evaluate the performance of each experiment, we use the `performance_crawler.py` files, located in the subfolder for each game. This file simply goes through the different chat histories it is provided with and calculates how many of each ending state it finds, for each prompt strategy. It then saves those metrics in the `performance` subfolder of each game, as absolute or relative values. The CSV file can then easily be translated into visualisations or into LaTeX. 
 
 ## Chat
 Finally, if you just want to talk to LLMs, you can use the `prompt_optimization.py` file. It launches an interactive **Arena** instance where you can simply ask questions to an agent. This is useful to quickly test agent capabilities and the impact of different prompts, hence the name. In between each answer, the interactive session will ask you, the user, to choose one of many options. 

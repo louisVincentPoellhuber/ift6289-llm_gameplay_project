@@ -52,7 +52,7 @@ with open(r"C:\Users\Louis\Documents\University\Masters\H24 - Deep NLP\ift6289-l
 
 NB_EXPERIMENTS = 10
 MAX_STEPS = 20
-PROMPT_MODES = ["best"]
+PROMPT_MODES = ["baseline", "bracket_format", "sentence_format", "format_reminder", "word_reminder", "best"]
 # ================= EXPERIMENTS ================
 
 for prompt_mode in PROMPT_MODES:
